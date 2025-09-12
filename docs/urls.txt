@@ -1,0 +1,3 @@
+https://www.cs.princeton.edu/courses/archive/fall24/cos597C/bib2/Ant_colony_optimization.pdf
+https://graphics.cs.uh.edu/wp-content/papers/2018/2018-CAVW-AntSimulation.pdf
+https://mathworld.wolfram.com/Lotka-VolterraEquations.html
