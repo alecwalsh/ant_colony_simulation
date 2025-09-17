@@ -1,4 +1,7 @@
-add_library(ant_sim_project ant_sim_project.cpp ../include/ant_sim_project/ant_sim_project.hpp)
+add_library(ant_sim_project
+        simulation.cpp ../include/ant_sim_project/simulation.hpp
+        world.cpp ../include/ant_sim_project/world.hpp
+)
 
 add_executable(ant_sim_project_main ant_sim_project_main.cpp)
 
