@@ -2,11 +2,15 @@ add_library(ant_sim_project
         simulation.cpp ../include/ant_sim_project/simulation.hpp
         world.cpp ../include/ant_sim_project/world.hpp
         ../include/ant_sim_project/mutex_guard.hpp
+        graphics.cpp ../include/ant_sim_project/graphics.hpp
 )
 
 add_executable(ant_sim_project_main ant_sim_project_main.cpp)
 
-target_link_libraries(ant_sim_project_main PRIVATE ant_sim_project)
+find_package(SFML CONFIG REQUIRED COMPONENTS Window Graphics)
+
+target_link_libraries(ant_sim_project PUBLIC SFML::Graphics)
+target_link_libraries(ant_sim_project_main PRIVATE ant_sim_project SFML::Window SFML::Graphics)
 
 target_compile_features(ant_sim_project PUBLIC c_std_23 cxx_std_23)
 

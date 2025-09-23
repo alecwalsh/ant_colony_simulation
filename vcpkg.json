@@ -3,7 +3,10 @@
   "version": "0.0.0.1",
 
   "dependencies": [
-
+    {
+      "name": "sfml",
+      "version>=": "3.0.1"
+    }
   ],
   "default-features": [],
   "features": {
