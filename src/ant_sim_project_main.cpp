@@ -18,9 +18,15 @@ int main() {
 
     unsigned window_width = 800;
     unsigned window_height = 600;
+
     unsigned max_framerate = 60;
 
+    auto view_width = static_cast<float>(window_width);
+    auto view_height = static_cast<float>(window_height);
+
     sf::RenderWindow window{sf::VideoMode{{window_width, window_height}}, "Ant colony simulation"};
+
+    window.setView(sf::View{sf::FloatRect{{}, {view_width, view_height}}});
 
     window.setFramerateLimit(max_framerate);
 
@@ -30,6 +36,15 @@ int main() {
         while(const auto event = window.pollEvent()) {
             if(event->is<sf::Event::Closed>()) {
                 window.close();
+            }
+            if (const auto* resized = event->getIf<sf::Event::Resized>()) {
+                auto [new_x, new_y] = resized->size;
+
+                sf::Vector2f new_size = {static_cast<float>(new_x), static_cast<float>(new_y)};
+
+                auto new_view = sf::View{sf::FloatRect{{}, new_size}};
+
+                window.setView(new_view);
             }
         }
 

@@ -6,10 +6,12 @@
 
 namespace ant_sim {
 class world {
+  public:
     struct cell {
         int i;
     };
 
+  private:
     std::size_t rows;
     std::size_t columns;
 
