@@ -1,7 +1,10 @@
 add_library(ant_sim_project
         simulation.cpp ../include/ant_sim_project/simulation.hpp
         world.cpp ../include/ant_sim_project/world.hpp
+        ant.cpp ../include/ant_sim_project/ant.hpp
+        ../include/ant_sim_project/nest.hpp
         ../include/ant_sim_project/mutex_guard.hpp
+        ../include/ant_sim_project/types.hpp
         graphics.cpp ../include/ant_sim_project/graphics.hpp
 )
 

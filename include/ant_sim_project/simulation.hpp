@@ -1,17 +1,17 @@
 #pragma once
 
-#include <cstdint>
 #include <cstddef>
 #include <mutex>
 
 #include "world.hpp"
+#include "types.hpp"
 #include "mutex_guard.hpp"
 
 namespace ant_sim {
 
 class simulation {
-    // is_running must always be accessed using std::atomic_ref
-    std::uint64_t tick_count = 0;
+    // tick_count must always be accessed using std::atomic_ref
+    tick_t tick_count = 0;
 
     // is_running must always be accessed using std::atomic_ref
     bool is_running = true;
@@ -29,7 +29,7 @@ class simulation {
     [[nodiscard]] bool running() const noexcept;
     void stop() noexcept;
 
-    [[nodiscard]] std::uint64_t get_tick_count() const noexcept;
+    [[nodiscard]] tick_t get_tick_count() const noexcept;
 
     void tick();
 };

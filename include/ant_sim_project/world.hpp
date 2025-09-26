@@ -1,7 +1,13 @@
 #pragma once
 
+#include "ant.hpp"
+#include "nest.hpp"
+#include "types.hpp"
+
 #include <cstddef>
+#include <random>
 #include <vector>
+#include <span>
 
 #include <experimental/mdspan>
 
@@ -12,7 +18,24 @@ namespace stdex = std::experimental;
 class world {
   public:
     struct tile {
-        int i;
+        static constexpr std::size_t pheromone_types = 2;
+        static constexpr nest_id_t max_nests = 2;
+
+        // Using struct of arrays instead of array of structs decreases the size of tile
+        struct pheromone_trails {
+            tick_t last_updated[max_nests][pheromone_types];
+            pheromone_strength_t pheromone_strength[max_nests][pheromone_types];
+        };
+
+        ant_id_t ant_id; // Meaningless if has_ant is false
+        nest_id_t nest_id; // Meaningless if has_nest is false
+
+        bool has_ant;
+        bool has_nest;
+
+        std::uint8_t food_supply;
+
+        pheromone_trails trails;
     };
 
   private:
@@ -21,14 +44,21 @@ class world {
 
     std::vector<tile> tiles;
 
+    std::vector<ant> ants;
+    std::vector<nest> nests;
+
+    std::default_random_engine rand;
+
+    void generate(nest_id_t nest_count, ant_id_t ant_count);
   public:
-    world(std::size_t rows, std::size_t columns) : rows{rows}, columns{columns} {
-        tiles = std::vector<tile>(rows * columns);
-    }
+    world(std::size_t rows, std::size_t columns, nest_id_t nest_count = 1, ant_id_t ant_count = 100);
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
         return stdex::mdspan{self.tiles.data(), self.rows, self.columns};
     }
+
+    // Returns a std::span referring to ants
+    [[nodiscard]] auto get_ants(this auto&& self) noexcept { return std::span{self.ants}; }
 };
 } // namespace ant_sim

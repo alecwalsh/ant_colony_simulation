@@ -33,7 +33,11 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
         for(auto x = 0uz; x < visible_width; x++) {
             const auto& tile = tiles[y, x];
 
-            auto brightness = static_cast<std::uint8_t>(tile.i / 10'000);
+            std::uint8_t brightness = 0;
+            
+            if(tile.has_ant) {
+                brightness = 255;
+            }
 
             sf::Color color{brightness, brightness, brightness};
 
