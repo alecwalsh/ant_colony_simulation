@@ -31,9 +31,14 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
     for(auto y = 0uz; y < visible_height; y++) {
         for(auto x = 0uz; x < visible_width; x++) {
-            const auto& tile = tiles[y, x];
+            auto& tile = tiles[y, x];
 
             sf::Color color{};
+
+            // Make sure pheromone values are up to date before drawing
+            for(nest_id_t i = 0uz; i < pheromone_type_count; i++) {
+                world::update_pheromones(tile.pheromones, world->sim->get_tick_count(), i);
+            }
 
             if(tile.has_nest) {
                 color = {0, 0, 255};
@@ -41,6 +46,12 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
                 color = {255, 255, 255};
             } else if(tile.food_supply > 0) {
                 color = {0, 255, 0};
+            } else {
+                auto red = tile.pheromones.pheromone_strength[0][0];
+
+                red = static_cast<pheromone_strength_t>(std::clamp(static_cast<float>(red) * 30.0f, 0.0f, 255.0f));
+
+                color = {static_cast<std::uint8_t>(red), 0, 0};
             }
 
             rectangle.setPosition({static_cast<float>(x) * tile_size, static_cast<float>(y) * tile_size});
