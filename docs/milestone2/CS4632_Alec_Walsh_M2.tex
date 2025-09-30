@@ -1,0 +1,75 @@
+\documentclass{article}
+
+\usepackage{hyperref}
+\usepackage{graphicx} % Required for inserting images
+
+\title{Ant Colony Simulation Project Milestone 2}
+\author{Alec Walsh}
+\date{October 1 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Project Status}
+
+I have implemented most of the basic elements of the simulation.
+
+\begin{itemize}
+
+\item Simulated ants move around the world, searching for food.
+\item The ants leave behind pheromone trails as they move.
+\item Pheromones fade over time.
+\item Ants ignore pheromones from nests other than their own.
+\item The graphics show the different elements of the simulation with different colors, allowing the user to visualize what is happening.
+
+\end{itemize}
+
+At the moment, there are no controls, but the user can watch the ants move back and forth between their nest and food sources.
+
+\section{Next Steps}
+
+The pathfinding works well when a small number of ants are present.  When multiple ants are present, they will sometimes interfere with each other.  This problem gets worse as more ants are added.  When running the simulation with a large number of ants, many of them will get lost or get stuck following each other in circles.
+
+Fixing this is my highest priority.  I believe I know what is causing this, and I aim to have the pathfinding working well with large amounts of ants within the week.
+
+After that, I am going to finish implementing the starvation and reproduction mechanics.  These are necessary for accomplishing the secondary goal of this project, simulating population dynamics.
+
+The third major goal I have for the next few weeks is implementing robust data collection mechanisms.  The project currently prints out basic information about the ants' behavior to the console, but that is not enough information to complete the file report.  This goal also includes improving the GUI to make it easy to set up specific scenarios to test.
+
+
+All of those goals are listed as issues on GitHub.  My GitHub project lists my planned timelines as well.
+
+
+\section{Screenshots}
+
+\subsection{GitHub Issues}
+
+\includegraphics[width=0.9\textwidth]{github_issues.png}
+
+\subsection{The Running Program}
+
+\includegraphics[width=0.9\textwidth]{screenshot1.png}
+
+This is the simplest possible case, with a single ant.  The ant started at the nest, the blue square at the top, and located a food source.  It then began moving back and forth between the nest and the food, resulting in a strong pheromone trail(red) between the food and the nest.  The ant will occasionally wander off the trail, but is usually drawn back onto it due to the pheromones.
+
+
+\includegraphics[width=0.9\textwidth]{screenshot2.png}
+
+This run includes 2 ants.  The ant on the left was repeatedly going to the first food source it located.  The second took a winding oath to reach the food directly below the nest.
+
+\includegraphics[width=0.9\textwidth]{screenshot3.png}
+
+This run includes 20 ants.  Most ants stay in the center, sticking to the closest food sources.  Several ants have wandered further, though.  The trails of faded red squares indicated the paths they took.
+
+
+\includegraphics[width=0.9\textwidth]{screenshot4.png}
+
+Testing the performance.  This is with a 5000x5000 tile map and 200000 ants.  This population level isn't actually practical for data collection, as the ants are severely bottlenecked and most are unable to leave the nest.  It does demonstrate the performance, though.  Each tick of the simulation was taking about 5ms.
+
+
+\includegraphics[width=0.9\textwidth]{screenshot5.png}
+
+WIP screenshot of improvements to the graphics.  This screenshot is uses different colors for different pheromone types, so you can tell whether a trail is leading away from or back to the nest.  Most ants are currently returning to the nest(the blue trails), but one on the right is heading away from the nest.  It's somewhat hard to tell what is going on with multiple colors, which is why I haven't committed it yet.  I want to add a UI to allow the user to toggle different visualizations first.
+
+\end{document}
