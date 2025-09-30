@@ -10,13 +10,13 @@ simulation::simulation(std::size_t rows, std::size_t columns) : sim_world{rows, 
 void simulation::tick() {
     auto world = get_world();
 
-    auto cells = world->get_cells();
+    auto tiles = world->get_tiles();
 
-    for(auto y = 0uz; y < cells.extent(0); y++) {
-        for(auto x = 0uz; x < cells.extent(1); x++) {
-            auto& cell = cells[y, x];
+    for(auto y = 0uz; y < tiles.extent(0); y++) {
+        for(auto x = 0uz; x < tiles.extent(1); x++) {
+            auto& tile = tiles[y, x];
 
-            cell.i++;
+            tile.i++;
         }
     }
 
