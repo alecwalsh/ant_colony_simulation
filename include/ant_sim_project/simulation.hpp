@@ -22,8 +22,7 @@ class simulation {
     mutable std::mutex mutex;
 
   public:
-    [[nodiscard]] mutex_guard<world> get_world() noexcept { return {&sim_world, mutex}; }
-    [[nodiscard]] mutex_guard<const world> get_world() const noexcept { return {&sim_world, mutex}; }
+    [[nodiscard]] auto get_world(this auto&& self) noexcept { return mutex_guard{&self.sim_world, self.mutex}; }
 
     simulation(std::size_t rows, std::size_t columns);
 

@@ -22,11 +22,9 @@ class world {
         cells = std::vector<cell>(rows * columns);
     }
 
-    [[nodiscard]] std::mdspan<cell, std::dextents<std::size_t, 2>> get_cells() noexcept {
-        return std::mdspan{cells.data(), rows, columns};
-    }
-    [[nodiscard]] std::mdspan<const cell, std::dextents<std::size_t, 2>> get_cells() const noexcept {
-        return std::mdspan{cells.data(), rows, columns};
+    // Returns a rows x columns std::mdspan referring to cells
+    [[nodiscard]] auto get_cells(this auto&& self) noexcept {
+        return std::mdspan{self.cells.data(), self.rows, self.columns};
     }
 };
 } // namespace ant_sim
