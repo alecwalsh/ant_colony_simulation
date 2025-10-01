@@ -5,7 +5,7 @@ namespace ant_sim::graphics {
 // Returns the number of visible tiles
 // The return value is in units of tiles
 static std::pair<std::size_t, std::size_t>
-get_visible_area(const sf::View& view, std::mdspan<world::tile, std::dextents<std::size_t, 2>> tiles, float tile_size) {
+get_visible_area(const sf::View& view, stdex::mdspan<world::tile, stdex::dextents<std::size_t, 2>> tiles, float tile_size) {
     auto [view_width, view_height] = view.getSize();
 
     auto view_width_in_tiles = static_cast<std::size_t>(view_width / tile_size);

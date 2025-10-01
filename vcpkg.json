@@ -6,6 +6,9 @@
     {
       "name": "sfml",
       "version>=": "3.0.1"
+    }, {
+      "name": "mdspan",
+      "version>=": "0.6.0"
     }
   ],
   "default-features": [],

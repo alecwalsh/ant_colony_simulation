@@ -8,8 +8,9 @@ add_library(ant_sim_project
 add_executable(ant_sim_project_main ant_sim_project_main.cpp)
 
 find_package(SFML CONFIG REQUIRED COMPONENTS Window Graphics)
+find_package(mdspan CONFIG REQUIRED)
 
-target_link_libraries(ant_sim_project PUBLIC SFML::Graphics)
+target_link_libraries(ant_sim_project PUBLIC SFML::Graphics std::mdspan)
 target_link_libraries(ant_sim_project_main PRIVATE ant_sim_project SFML::Window SFML::Graphics)
 
 target_compile_features(ant_sim_project PUBLIC c_std_23 cxx_std_23)

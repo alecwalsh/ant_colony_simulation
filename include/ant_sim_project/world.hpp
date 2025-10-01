@@ -2,9 +2,13 @@
 
 #include <cstddef>
 #include <vector>
-#include <mdspan>
+
+#include <experimental/mdspan>
 
 namespace ant_sim {
+
+namespace stdex = std::experimental;
+
 class world {
   public:
     struct tile {
@@ -24,7 +28,7 @@ class world {
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
-        return std::mdspan{self.tiles.data(), self.rows, self.columns};
+        return stdex::mdspan{self.tiles.data(), self.rows, self.columns};
     }
 };
 } // namespace ant_sim
