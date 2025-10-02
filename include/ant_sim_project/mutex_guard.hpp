@@ -3,6 +3,8 @@
 #include <mutex>
 #include <cassert>
 
+// Wraps a pointer to an object and a unique_lock protecting that object
+// Similar to Rust's std::sync::MutexGuard
 template <typename T, typename Mutex = std::mutex>
 class mutex_guard {
     T* pointer;
