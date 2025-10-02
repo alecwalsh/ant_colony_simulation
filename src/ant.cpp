@@ -53,15 +53,37 @@ constexpr auto get_neighbors(world& world, point location) noexcept {
     return arr;
 }
 
+// Move the ant to a new location
+// This updates the ant's location field, the has_ant field in the starting tile and destination tile
+// and updates the strength of the pheromone trails
 void ant::move(world& world, point new_location) {
     auto tiles = world.get_tiles();
 
     auto& current_tile = tiles[location.y, location.x];
     auto& new_tile = tiles[new_location.y, new_location.x];
 
-    assert(!new_tile.has_ant); // Can't have multiple ants per tile
+    assert(!new_tile.is_full()); // Can't have multiple ants per tile unless the tile is a nest
 
-    current_tile.has_ant = false;
+    auto nests = world.get_nests();
+
+    if(current_tile.has_nest) {
+        // Nests can hold multiple ants
+        auto& nest = nests[current_tile.nest_id];
+
+        assert(nest.ant_count != 0);
+        if(--nest.ant_count == 0) {
+            current_tile.has_ant = false;
+        }
+    } else {
+        current_tile.has_ant = false;
+    }
+
+    if(new_tile.has_nest) {
+        // Nests can hold multiple ants, so increment this nest's ant count
+        auto& nest = nests[new_tile.nest_id];
+
+        nest.ant_count++;
+    }
 
     new_tile.has_ant = true;
     new_tile.ant_id = ant_id;

@@ -38,6 +38,8 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
             });
             // clang-format on
 
+            nest.ant_count++;
+
             auto& tile = tiles[nest.location.y, nest.location.x];
             tile.has_ant = true;
             tile.ant_id = ants.back().ant_id;

@@ -36,6 +36,10 @@ class world {
         std::uint8_t food_supply;
 
         pheromone_trails trails;
+
+        [[nodiscard]] bool is_full() const noexcept {
+            return !has_nest && has_ant;
+        }
     };
 
   private:
@@ -60,5 +64,8 @@ class world {
 
     // Returns a std::span referring to ants
     [[nodiscard]] auto get_ants(this auto&& self) noexcept { return std::span{self.ants}; }
+
+    // Returns a std::span referring to nests
+    [[nodiscard]] auto get_nests(this auto&& self) noexcept { return std::span{self.nests}; }
 };
 } // namespace ant_sim
