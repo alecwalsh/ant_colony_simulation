@@ -14,7 +14,7 @@ using nest_id_t = std::uint8_t;
 // The type used to represent ant ids
 using ant_id_t = std::uint32_t;
 
-using pheromone_strength_t = std::uint8_t;
+using pheromone_strength_t = float;
 
 // A 2-dimensional point
 struct point {

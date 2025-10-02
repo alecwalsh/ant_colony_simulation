@@ -6,7 +6,8 @@
 #include <print>
 
 namespace ant_sim {
-simulation::simulation(std::size_t rows, std::size_t columns) : sim_world{rows, columns} {}
+
+simulation::simulation(std::size_t rows, std::size_t columns) : sim_world{rows, columns, this} {}
 
 void simulation::tick() {
     auto world = get_world();
@@ -23,7 +24,7 @@ void simulation::tick() {
     world.unlock();
 
     // TODO: adjust sleep time based on desired simulation framerate
-    std::this_thread::sleep_for(std::chrono::milliseconds{300});
+    std::this_thread::sleep_for(std::chrono::milliseconds{100});
 }
 
 [[nodiscard]] bool simulation::running() const noexcept {

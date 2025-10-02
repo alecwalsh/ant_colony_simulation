@@ -18,8 +18,12 @@ public:
 
     point location;
 
-    void tick(world& world);
+    enum class state {
+        searching,
+        returning
+    } state;
 
+    void tick(world& world);
     void move(world& world, point new_location);
 };
 

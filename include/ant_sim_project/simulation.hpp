@@ -9,6 +9,23 @@
 
 namespace ant_sim {
 
+constexpr std::size_t pheromone_type_count = world::tile::pheromone_type_count;
+
+// TODO: move these constants somewhere else
+// TODO: Allow adjusting these values at runtime
+// TODO: Support separate values for each pheromone type
+
+// How much a pheromone's strength decreases each tick
+constexpr float falloff_rate = 0.025f;
+
+// How much a pheromone's strength increases when left by an ant
+constexpr pheromone_strength_t increase_rate = 3;
+
+// A value in this range is added to pheromone strength when calculating weights
+constexpr std::pair add_random_range = {-0.1f, 0.1f};
+// Pheromone strength is multiplied by a value in this range when calculating weights
+constexpr std::pair mul_random_range = {0.5f, 1.5f};
+
 class simulation {
     // tick_count must always be accessed using std::atomic_ref
     tick_t tick_count = 0;
@@ -33,4 +50,5 @@ class simulation {
 
     void tick();
 };
+
 } // namespace ant_sim

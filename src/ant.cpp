@@ -1,19 +1,25 @@
 #include "ant.hpp"
 
+#include "simulation.hpp"
 #include "world.hpp"
 
 #include <array>
 #include <optional>
+#include <ranges>
 #include <cassert>
 
+#include <print>
+
 namespace ant_sim {
+
+constexpr std::size_t max_neighbors = 8;
 
 // Return the neighboring points as an array of std::optional<point>
 // If the neighbor would have been out of bounds, that array element is std::nullopt
 constexpr auto get_neighbors(world& world, point location) noexcept {
     auto [x, y] = location;
 
-    std::array<std::optional<point>, 8> arr = {};
+    std::array<std::optional<point>, max_neighbors> arr = {};
 
     auto max_x = world.get_tiles().extent(1) - 1;
     auto max_y = world.get_tiles().extent(0) - 1;
@@ -78,7 +84,26 @@ void ant::move(world& world, point new_location) {
         current_tile.has_ant = false;
     }
 
-    if(new_tile.has_nest) {
+    for(auto i = 0uz; i < pheromone_type_count; i++) {
+        assert(new_tile.pheromones.last_updated[nest_id][i] == world.sim->get_tick_count());
+    }
+    // Apply pheromone trails
+    current_tile.pheromones.pheromone_strength[nest_id][std::to_underlying(state)] += increase_rate;
+
+    // Switch state to returning to nest
+    // TODO: Collect food
+    if(new_tile.food_supply != 0) {
+        std::println("Ant {} switching state to returning", ant_id);
+        state = state::returning;
+    }
+
+    // Ant has returned to its nest
+    // Set state to searching
+    // TODO: Deposit food in nest
+    if(new_tile.has_nest && new_tile.nest_id == nest_id) {
+        std::println("Ant {} switching state to searching", ant_id);
+        state = state::searching;
+
         // Nests can hold multiple ants, so increment this nest's ant count
         auto& nest = nests[new_tile.nest_id];
 
@@ -91,21 +116,98 @@ void ant::move(world& world, point new_location) {
     location = new_location;
 }
 
+// Determines and executes the ant's next action
+// When the ant is searching for food it will avoid tiles with type 1 pheromones and prefer tiles with type 2 pheromones
+// It increases the strength of the type 1 pheromone on the tile it is leaving
+// When the ant is returning to the nest it behaves the same, but with its pheromone preferences flipped
 void ant::tick(world& world) {
     auto tiles = world.get_tiles();
 
-    auto neighbors = get_neighbors(world, location);
+    auto neighboring_points = get_neighbors(world, location);
 
-    for(auto& neighbor : neighbors) {
+    auto has_value = []<typename T>(const std::optional<T>& opt) { return opt.has_value(); };
+    auto point_to_tile = [tiles](const std::optional<point>& opt) -> auto& { return tiles[opt->y, opt->x]; };
+
+    auto current_tick = world.sim->get_tick_count();
+
+    struct result_t {
+        float weight;
+        point location;
+    };
+
+    std::optional<result_t> results[max_neighbors] = {};
+
+    for(auto i = 0uz; i < std::size(results); i++) {
+        auto& neighbor = neighboring_points[i];
+
         if(!neighbor) continue;
 
-        auto [x, y] = *neighbor;
+        auto& tile = point_to_tile(*neighbor);
 
-        if(!tiles[y, x].has_ant && y > location.y) {
-            move(world, *neighbor);
-            return;
+        // Ignore tiles that are already full
+        if(tile.is_full()) continue;
+
+        world::update_pheromones(tile.pheromones, current_tick, nest_id);
+
+        // Tile has food
+        // If searching, assign the highest possible weight to ensure that this tile is preferred
+        // If returning, assign the lowest possible weight to ensure that this tile is avoided
+        if(tile.food_supply != 0) {
+            float multiplier = state == state::searching ? 1 : -1;
+
+            results[i] = {.weight = std::numeric_limits<float>::infinity() * multiplier, .location = *neighbor};
+
+            continue;
         }
+
+        // Tile is the ant's nest
+        // If returning, assign the highest possible weight to ensure that this tile is preferred
+        // If searching, assign the lowest possible weight to ensure that this tile is avoided
+        if(tile.has_nest && tile.nest_id == nest_id) {
+            float multiplier = state == state::returning ? 1 : -1;
+
+            results[i] = {.weight = std::numeric_limits<float>::infinity() * multiplier, .location = *neighbor};
+
+            continue;
+        }
+
+        float type1_strength = tile.pheromones.pheromone_strength[nest_id][0];
+        float type2_strength = tile.pheromones.pheromone_strength[nest_id][1];
+
+        // Apply some randomization to the pheromone strengths
+        std::uniform_real_distribution dist1{add_random_range.first, add_random_range.second};
+        std::uniform_real_distribution dist2{mul_random_range.first, mul_random_range.second};
+
+        type1_strength += dist1(world.rand);
+        type2_strength += dist1(world.rand);
+
+        type1_strength *= dist2(world.rand);
+        type2_strength *= dist2(world.rand);
+
+        if(state == state::searching) {
+            type1_strength *= -0.5f;
+            // type2_strength *= 1;
+        } else if(state == state::returning) {
+            // type1_strength *= 1;
+            type2_strength *= -0.5f;
+        }
+
+        results[i] = {.weight = type1_strength + type2_strength, .location = *neighbor};
     }
+
+    // Exclude any out of bounds or full results
+    auto possible_results = results | std::views::filter(has_value);
+
+    // All possible locations are full, no movement is possible
+    if(std::ranges::empty(possible_results)) return;
+
+    auto [weight, new_location] = **std::ranges::max_element(possible_results, {}, &result_t::weight);
+
+    assert(!point_to_tile(new_location).is_full());
+
+    std::println("moving ant {} to {{{}, {}}} with weight {}", ant_id, new_location.x, new_location.y, weight);
+
+    move(world, new_location);
 }
 
 } // namespace ant_sim

@@ -15,16 +15,20 @@ namespace ant_sim {
 
 namespace stdex = std::experimental;
 
+class simulation;
+
 class world {
   public:
     struct tile {
-        static constexpr std::size_t pheromone_types = 2;
+        // TODO: Remove this definition, merge with the one in simulation.hpp
+        static constexpr std::size_t pheromone_type_count = 2;
+
         static constexpr nest_id_t max_nests = 2;
 
         // Using struct of arrays instead of array of structs decreases the size of tile
         struct pheromone_trails {
-            tick_t last_updated[max_nests][pheromone_types];
-            pheromone_strength_t pheromone_strength[max_nests][pheromone_types];
+            tick_t last_updated[max_nests][pheromone_type_count];
+            pheromone_strength_t pheromone_strength[max_nests][pheromone_type_count];
         };
 
         ant_id_t ant_id; // Meaningless if has_ant is false
@@ -35,11 +39,9 @@ class world {
 
         std::uint8_t food_supply;
 
-        pheromone_trails trails;
+        pheromone_trails pheromones;
 
-        [[nodiscard]] bool is_full() const noexcept {
-            return !has_nest && has_ant;
-        }
+        [[nodiscard]] bool is_full() const noexcept { return !has_nest && has_ant; }
     };
 
   private:
@@ -51,11 +53,15 @@ class world {
     std::vector<ant> ants;
     std::vector<nest> nests;
 
+    void generate(nest_id_t nest_count, ant_id_t ant_count);
+
+  public:
     std::default_random_engine rand;
 
-    void generate(nest_id_t nest_count, ant_id_t ant_count);
-  public:
-    world(std::size_t rows, std::size_t columns, nest_id_t nest_count = 1, ant_id_t ant_count = 100);
+    // TODO: Merge simulation and world classes
+    simulation* sim;
+
+    world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count = 1, ant_id_t ant_count = 1);
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
@@ -67,5 +73,9 @@ class world {
 
     // Returns a std::span referring to nests
     [[nodiscard]] auto get_nests(this auto&& self) noexcept { return std::span{self.nests}; }
+
+    // Updates the strength of the pheromone trails to account for fading over time
+    static void update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id);
 };
+
 } // namespace ant_sim

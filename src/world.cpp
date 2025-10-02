@@ -1,11 +1,12 @@
 #include "world.hpp"
 
+#include "simulation.hpp"
+
 #include <stdexcept>
 #include <format>
 #include <print>
 
 namespace ant_sim {
-
 void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
     auto tiles = get_tiles();
 
@@ -59,9 +60,8 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
 }
 
 // TODO: allow specifying RNG seed
-world::world(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count)
-    : rows{rows}, columns{columns}, tiles(rows * columns), rand{std::random_device{}()} {
-
+world::world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count)
+: rows{rows}, columns{columns}, tiles(rows * columns), rand{std::random_device{}()}, sim{sim} {
     if(nest_count > tile::max_nests) {
         auto error_string = std::format("Error: {} nests is greater than the maximum of {}", nest_count, tile::max_nests);
         throw std::runtime_error{error_string};
@@ -72,5 +72,28 @@ world::world(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id
 
     generate(nest_count, ant_count);
 }
+
+void world::update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id) {
+    for(auto i = 0uz; i < pheromone_type_count; i++) {
+        auto& strength = pheromone_trails.pheromone_strength[nest_id][i];
+        auto& last_updated = pheromone_trails.last_updated[nest_id][i];
+
+        auto ticks_since_last_update = static_cast<float>(current_tick - last_updated);
+
+        last_updated = current_tick;
+
+        auto decrease = falloff_rate * ticks_since_last_update;
+
+        if(decrease > 0.1f) {
+            std::println("decrease: {}", decrease);
+        }
+
+        if(falloff_rate * decrease > strength) {
+            strength = 0;
+        } else {
+            strength -= static_cast<pheromone_strength_t>(decrease);
+        }
+    }
+};
 
 } // namespace ant_sim
