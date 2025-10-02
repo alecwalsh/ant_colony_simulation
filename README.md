@@ -36,6 +36,17 @@ Replace /path/to/vcpkg with the path that vcpkg was cloned into.
 
 I have tested this on Linux and macOS.  It should work on Windows, as I've taken care to not write any platform-specific code, but I haven't actually tried.
 
+## Dependencies
+
+This project has two direct dependencies, not counting the C++ standard library.  
+
+It uses [SFML](https://www.sfml-dev.org/), a cross-platform library that handles window creation, input handling, as well as providing a simple 2D graphics API.  
+
+I also use [this](https://github.com/kokkos/mdspan) reference implementation of std::mdspan.  std::mdspan was added to the standard library in C++23, but is not yet widely available.  This library is a drop-in replacement.  
+
+It should be possible to remove this dependency in the future, once libstdc++ supports std::mdspan.
+
+
 ## Usage
 
 The executable will be located at src/ant_sim_project_main, in the directory the project was built in.
