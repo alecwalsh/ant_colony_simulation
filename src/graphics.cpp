@@ -33,13 +33,15 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
         for(auto x = 0uz; x < visible_width; x++) {
             const auto& tile = tiles[y, x];
 
-            std::uint8_t brightness = 0;
-            
-            if(tile.has_ant) {
-                brightness = 255;
-            }
+            sf::Color color{};
 
-            sf::Color color{brightness, brightness, brightness};
+            if(tile.has_nest) {
+                color = {0, 0, 255};
+            } else if(tile.has_ant) {
+                color = {255, 255, 255};
+            } else if(tile.food_supply > 0) {
+                color = {0, 255, 0};
+            }
 
             rectangle.setPosition({static_cast<float>(x) * tile_size, static_cast<float>(y) * tile_size});
             rectangle.setFillColor(color);
