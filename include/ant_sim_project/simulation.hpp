@@ -36,11 +36,12 @@ class simulation {
     };
 
   private:
-    // tick_count must always be accessed using std::atomic_ref
-    tick_t tick_count = 0;
-
-    // state must always be accessed using std::atomic_ref
-    simulation_state state = simulation_state::running;
+    // All members of this struct must always be accessed via std::atomic_ref, as multiple threads may access them.
+    // Each member is independent of the others.  There is no need to pass the entire struct to std::atomic_ref.
+    struct {
+        tick_t tick_count = 0;
+        simulation_state state = simulation_state::running;
+    } atomically_accessed;
 
     // Must be accessed through get_world, not directly, even within this class
     world sim_world;

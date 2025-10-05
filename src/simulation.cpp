@@ -18,7 +18,7 @@ void simulation::tick() {
         ant.tick(*world);
     }
 
-    ++std::atomic_ref{tick_count};
+    ++std::atomic_ref{atomically_accessed.tick_count};
 
     if(get_tick_count() % 1'000 == 0) {
         std::println("tick(): {}", get_tick_count());
@@ -35,10 +35,12 @@ void simulation::tick() {
 
 simulation::simulation_state simulation::get_state() const noexcept {
     // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
-    return std::atomic_ref{const_cast<simulation_state&>(state)};
+    return std::atomic_ref{const_cast<simulation_state&>(atomically_accessed.state)};
 }
 
-void simulation::set_state(simulation_state new_state) noexcept { std::atomic_ref{state} = new_state; }
+void simulation::set_state(simulation_state new_state) noexcept {
+    std::atomic_ref{atomically_accessed.state} = new_state;
+}
 
 bool simulation::stopped() const noexcept { return get_state() == simulation_state::stopped; }
 
@@ -52,7 +54,7 @@ void simulation::pause(bool is_paused) noexcept {
 
 tick_t simulation::get_tick_count() const noexcept {
     // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
-    return std::atomic_ref{const_cast<tick_t&>(tick_count)};
+    return std::atomic_ref{const_cast<tick_t&>(atomically_accessed.tick_count)};
 }
 
 } // namespace ant_sim
