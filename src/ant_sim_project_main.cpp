@@ -36,8 +36,7 @@ int main() {
         while(const auto event = window.pollEvent()) {
             if(event->is<sf::Event::Closed>()) {
                 window.close();
-            }
-            if (const auto* resized = event->getIf<sf::Event::Resized>()) {
+            } else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
                 auto [new_x, new_y] = resized->size;
 
                 sf::Vector2f new_size = {static_cast<float>(new_x), static_cast<float>(new_y)};
@@ -45,6 +44,10 @@ int main() {
                 auto new_view = sf::View{sf::FloatRect{{}, new_size}};
 
                 window.setView(new_view);
+            } else if (const auto* key = event->getIf<sf::Event::KeyReleased>()) {
+                if(key->code == sf::Keyboard::Key::Space) {
+                    sim.pause(!sim.paused());
+                }
             }
         }
 

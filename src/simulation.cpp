@@ -10,6 +10,8 @@ namespace ant_sim {
 simulation::simulation(std::size_t rows, std::size_t columns) : sim_world{rows, columns, this} {}
 
 void simulation::tick() {
+    if(paused()) return;
+
     auto world = get_world();
 
     for(auto& ant : world->get_ants()) {
@@ -27,16 +29,23 @@ void simulation::tick() {
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
 }
 
-[[nodiscard]] bool simulation::running() const noexcept {
+bool simulation::running() const noexcept {
     // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
     return std::atomic_ref{const_cast<bool&>(is_running)};
 }
 
-[[nodiscard]] tick_t simulation::get_tick_count() const noexcept {
+void simulation::stop() noexcept { std::atomic_ref{is_running} = false; }
+
+bool simulation::paused() const noexcept {
+    // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
+    return std::atomic_ref{const_cast<bool&>(is_paused)};
+}
+
+void simulation::pause(bool is_paused) noexcept { std::atomic_ref{this->is_paused} = is_paused; }
+
+tick_t simulation::get_tick_count() const noexcept {
     // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
     return std::atomic_ref{const_cast<tick_t&>(tick_count)};
 }
-
-void simulation::stop() noexcept { std::atomic_ref{is_running} = false; }
 
 } // namespace ant_sim

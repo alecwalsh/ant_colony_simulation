@@ -33,6 +33,9 @@ class simulation {
     // is_running must always be accessed using std::atomic_ref
     bool is_running = true;
 
+    // paused must always be accessed using std::atomic_ref
+    bool is_paused = false;
+
     // Must be accessed through get_world, not directly, even within this class
     world sim_world;
 
@@ -45,6 +48,9 @@ class simulation {
 
     [[nodiscard]] bool running() const noexcept;
     void stop() noexcept;
+
+    [[nodiscard]] bool paused() const noexcept;
+    void pause(bool is_paused = true) noexcept;
 
     [[nodiscard]] tick_t get_tick_count() const noexcept;
 
