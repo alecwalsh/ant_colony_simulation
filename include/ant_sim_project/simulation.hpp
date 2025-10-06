@@ -41,6 +41,7 @@ class simulation {
     struct {
         tick_t tick_count = 0;
         simulation_state state = simulation_state::running;
+        point mouse_location = {0, 0};
     } atomically_accessed;
 
     // Must be accessed through get_world, not directly, even within this class
@@ -65,6 +66,9 @@ class simulation {
     [[nodiscard]] bool paused() const noexcept;
     // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
     void pause(bool is_paused = true) noexcept;
+
+    point get_mouse_location() const noexcept;
+    void set_mouse_location(point location) noexcept;
 
     [[nodiscard]] tick_t get_tick_count() const noexcept;
 

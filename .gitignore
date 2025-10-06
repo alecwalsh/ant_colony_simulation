@@ -1,9 +1,12 @@
-#CMake
+# CMake
 build/
 
-.vs
-
-#CLion
+# CLion
 .idea/
 
+# Visual Studio
+.vs/
+
 CMakeUserPresets.json
+
+data/

@@ -52,6 +52,14 @@ void simulation::pause(bool is_paused) noexcept {
     set_state(is_paused ? simulation_state::paused : simulation_state::running);
 }
 
+point simulation::get_mouse_location() const noexcept {
+    return std::atomic_ref{const_cast<point&>(atomically_accessed.mouse_location)};
+}
+
+void simulation::set_mouse_location(point location) noexcept {
+    std::atomic_ref{atomically_accessed.mouse_location} = location;
+}
+
 tick_t simulation::get_tick_count() const noexcept {
     // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
     return std::atomic_ref{const_cast<tick_t&>(atomically_accessed.tick_count)};

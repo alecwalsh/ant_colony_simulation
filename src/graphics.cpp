@@ -1,5 +1,7 @@
 #include "graphics.hpp"
 
+#include <format>
+
 namespace ant_sim::graphics {
 
 // Returns the number of visible tiles
@@ -17,6 +19,46 @@ get_visible_area(const sf::View& view, stdex::mdspan<world::tile, stdex::dextent
     auto height = std::min(view_height_in_tiles, world_height);
 
     return std::pair{width, height};
+}
+
+void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates& states, const world& world) const {
+    sf::Text text{font};
+
+    auto [x, y] = sim->get_mouse_location();
+
+    auto tile_x = static_cast<std::size_t>(x / tile_size);
+    auto tile_y = static_cast<std::size_t>(y / tile_size);
+
+    auto tiles = world.get_tiles();
+
+    if(tile_x >= tiles.extent(1) || tile_y >= tiles.extent(0)) {
+        // Tile is out of bounds, and therefore has no associated information to display
+        return;
+    }
+
+    const auto& tile = tiles[tile_y, tile_x];
+
+    std::string tile_description;
+
+    if(tile.has_nest) {
+        tile_description = std::format("Nest {}", tile.nest_id);
+    } else if(tile.has_ant) {
+        tile_description = std::format("Ant {} from nest {}", tile.ant_id, world.get_ants()[tile.ant_id].nest_id);
+    } else if(tile.food_supply > 0) {
+        tile_description = std::format("Food supply: {}", tile.food_supply);
+    } else {
+        tile_description = std::format("Pheromones: {:.3f}", tile.pheromones.pheromone_strength[0][0]);
+    }
+
+    text.setString(std::format("{}, {}\n{}", tile_y, tile_x, tile_description));
+
+    auto [width, height] = target.getView().getSize();
+
+    text.setPosition({width - 325, height - 100});
+    text.setCharacterSize(24 * 2);
+    text.setFillColor(sf::Color::Blue);
+
+    target.draw(text, states);
 }
 
 void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -59,5 +101,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
             target.draw(rectangle, states);
         }
     }
+
+    draw_text(target, states, *world);
 }
 } // namespace ant_sim::graphics

@@ -33,6 +33,8 @@ int main() {
     ant_sim::graphics::world_drawable world_drawable{&sim};
 
     while(window.isOpen()) {
+        window.clear(sf::Color::Black);
+
         while(const auto event = window.pollEvent()) {
             if(event->is<sf::Event::Closed>()) {
                 window.close();
@@ -52,6 +54,10 @@ int main() {
                 if(key->code == sf::Keyboard::Key::Period) {
                     sim.set_state(ant_sim::simulation::simulation_state::single_step);
                 }
+            } else if (const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) {
+                auto [x, y] = mouse_move->position;
+
+                sim.set_mouse_location({static_cast<std::size_t>(x), static_cast<std::size_t>(y)});
             }
         }
 
