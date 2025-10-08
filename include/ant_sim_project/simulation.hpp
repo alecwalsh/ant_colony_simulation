@@ -76,7 +76,7 @@ class simulation {
         std::uint64_t food_count = 0;
 
         bool log_ant_movements = false;
-        bool log_ant_state_changes = false;
+        bool log_ant_state_changes = true;
     } atomically_accessed;
 
     // Holds new ants that have not yet been added to the simulation

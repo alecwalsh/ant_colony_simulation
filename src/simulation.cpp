@@ -146,6 +146,8 @@ void simulation::update_pheromones(tile::pheromone_trails& pheromone_trails, tic
 void simulation::tick() {
     if(paused()) return;
 
+    std::println("Tick,{},{},{}", ants.size(), get_tick_count(), get_food_count());
+
     for(auto it = ants.begin(); it != ants.end();) {
         auto& ant = it->second;
 
@@ -153,12 +155,15 @@ void simulation::tick() {
 
         if(ant.dead) {
             it = ants.erase(it);
+
+            std::println("Death,{},{},{},{}", ant.ant_id, ant.nest_id, ant.location.x, ant.location.y);
         } else {
             ++it;
         }
     }
 
     for(auto& new_ant : new_ants) {
+        std::println("Birth,{},{},{},{}", new_ant.ant_id, new_ant.nest_id, new_ant.location.x, new_ant.location.y);
         add_ant(new_ant);
     }
 

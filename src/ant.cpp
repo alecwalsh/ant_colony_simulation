@@ -113,8 +113,7 @@ void ant::move(simulation& sim, point<> new_location) {
         state = state::returning;
 
         if(sim.get_log_ant_state_changes()) {
-            std::println("Ant {} at {{{}, {}}} switching state to returning, collected {} food", ant_id, location.x,
-                         location.y, food_taken);
+            std::println("StateChange,Returning,{},{},{},{},{}", ant_id, nest_id, location.x, location.y, food_taken);
         }
     }
 
@@ -138,8 +137,7 @@ void ant::move(simulation& sim, point<> new_location) {
         state = state::searching;
 
         if(sim.get_log_ant_state_changes()) {
-            std::println("Ant {} at {{{}, {}}} switching state to searching, deposited {} food", ant_id, location.x,
-                         location.y, food_deposited);
+            std::println("StateChange,Searching,{},{},{},{},{}", ant_id, nest_id, location.x, location.y, food_deposited);
         }
     }
 
