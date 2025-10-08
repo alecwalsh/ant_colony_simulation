@@ -27,21 +27,28 @@ void simulation::tick() {
 
     // TODO: adjust sleep time based on desired simulation framerate
     std::this_thread::sleep_for(std::chrono::milliseconds{100});
+
+    if(get_state() == simulation_state::single_step) {
+        pause(true);
+    }
 }
 
-bool simulation::running() const noexcept {
+simulation::simulation_state simulation::get_state() const noexcept {
     // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
-    return std::atomic_ref{const_cast<bool&>(is_running)};
+    return std::atomic_ref{const_cast<simulation_state&>(state)};
 }
 
-void simulation::stop() noexcept { std::atomic_ref{is_running} = false; }
+void simulation::set_state(simulation_state new_state) noexcept { std::atomic_ref{state} = new_state; }
 
-bool simulation::paused() const noexcept {
-    // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
-    return std::atomic_ref{const_cast<bool&>(is_paused)};
+bool simulation::stopped() const noexcept { return get_state() == simulation_state::stopped; }
+
+void simulation::stop() noexcept { set_state(simulation_state::stopped); }
+
+bool simulation::paused() const noexcept { return get_state() == simulation_state::paused; }
+
+void simulation::pause(bool is_paused) noexcept {
+    set_state(is_paused ? simulation_state::paused : simulation_state::running);
 }
-
-void simulation::pause(bool is_paused) noexcept { std::atomic_ref{this->is_paused} = is_paused; }
 
 tick_t simulation::get_tick_count() const noexcept {
     // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast

@@ -27,14 +27,20 @@ constexpr std::pair add_random_range = {-0.1f, 0.1f};
 constexpr std::pair mul_random_range = {0.5f, 1.5f};
 
 class simulation {
+  public:
+    enum class simulation_state : std::uint8_t {
+        running,     // The simulation is running
+        stopped,     // The simulation has permanently stopped
+        single_step, // The simulation is running, but will be automatically paused after the next tick
+        paused       // The simulation is paused
+    };
+
+  private:
     // tick_count must always be accessed using std::atomic_ref
     tick_t tick_count = 0;
 
-    // is_running must always be accessed using std::atomic_ref
-    bool is_running = true;
-
-    // paused must always be accessed using std::atomic_ref
-    bool is_paused = false;
+    // state must always be accessed using std::atomic_ref
+    simulation_state state = simulation_state::running;
 
     // Must be accessed through get_world, not directly, even within this class
     world sim_world;
@@ -46,10 +52,17 @@ class simulation {
 
     simulation(std::size_t rows, std::size_t columns);
 
-    [[nodiscard]] bool running() const noexcept;
+    [[nodiscard]] simulation_state get_state() const noexcept;
+    void set_state(simulation_state new_state) noexcept;
+
+    // Checks if state == simulation_state::stopped
+    [[nodiscard]] bool stopped() const noexcept;
+    // Sets state to simulation_state::stopped
     void stop() noexcept;
 
+    // Checks if state == simulation_state::paused
     [[nodiscard]] bool paused() const noexcept;
+    // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
     void pause(bool is_paused = true) noexcept;
 
     [[nodiscard]] tick_t get_tick_count() const noexcept;

@@ -11,7 +11,7 @@ int main() {
     ant_sim::simulation sim{100, 100};
 
     std::jthread simulation_thread{[](const std::stop_token& stop_token, ant_sim::simulation& sim) {
-        while(sim.running() && !stop_token.stop_requested()) {
+        while(!sim.stopped() && !stop_token.stop_requested()) {
             sim.tick();
         }
     }, std::ref(sim)};
@@ -46,7 +46,11 @@ int main() {
                 window.setView(new_view);
             } else if (const auto* key = event->getIf<sf::Event::KeyReleased>()) {
                 if(key->code == sf::Keyboard::Key::Space) {
-                    sim.pause(!sim.paused());
+                    auto p = sim.paused();
+                    sim.pause(!p);
+                }
+                if(key->code == sf::Keyboard::Key::Period) {
+                    sim.set_state(ant_sim::simulation::simulation_state::single_step);
                 }
             }
         }
