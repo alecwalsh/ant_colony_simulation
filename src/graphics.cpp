@@ -4,27 +4,42 @@
 
 namespace ant_sim::graphics {
 
-// Returns the number of visible tiles
-static std::pair<std::size_t, std::size_t>
-get_visible_area(const sf::View& view, stdex::mdspan<world::tile, stdex::dextents<std::size_t, 2>> tiles, float tile_size) {
+// Returns the top left and bottom right tiles of the visible area
+// This does not account for rotated views
+static std::pair<point<>, point<>> get_visible_area(const sf::View& view,
+                                                stdex::mdspan<world::tile, stdex::dextents<std::size_t, 2>> tiles,
+                                                float tile_size) {
     auto [view_width, view_height] = view.getSize();
+    auto [center_x, center_y] = view.getCenter();
 
-    auto view_width_in_tiles = static_cast<std::size_t>(view_width / tile_size);
-    auto view_height_in_tiles = static_cast<std::size_t>(view_height / tile_size);
+    // Calculate the visible tiles
+    // These values may be out of bounds, and need to be clamped before being used as indices
+    auto left = std::floor((center_x - view_width / 2) / tile_size);
+    auto right = std::ceil((center_x + view_width / 2) / tile_size);
+    auto top = std::floor((center_y - view_height / 2) / tile_size);
+    auto bottom = std::ceil((center_y + view_height / 2) / tile_size);
 
-    auto world_width = tiles.extent(1);
-    auto world_height = tiles.extent(0);
+    auto world_width = static_cast<float>(tiles.extent(1));
+    auto world_height = static_cast<float>(tiles.extent(0));
 
-    auto width = std::min(view_width_in_tiles, world_width);
-    auto height = std::min(view_height_in_tiles, world_height);
+    // Clamp the coordinates to the world bounds
+    auto left_clamped = static_cast<std::size_t>(std::clamp(left, 0.0f, world_width));
+    auto right_clamped = static_cast<std::size_t>(std::clamp(right, 0.0f, world_width));
+    auto top_clamped = static_cast<std::size_t>(std::clamp(top, 0.0f, world_height));
+    auto bottom_clamped = static_cast<std::size_t>(std::clamp(bottom, 0.0f, world_height));
 
-    return std::pair{width, height};
+    return {{left_clamped, top_clamped}, {right_clamped, bottom_clamped}};
 }
 
 void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates& states, const world& world) const {
     sf::Text text{font};
 
     auto [x, y] = sim->get_mouse_location();
+
+    if(x < 0 || y < 0) {
+        // Tile is out of bounds, and therefore has no associated information to display
+        return;
+    }
 
     auto tile_x = static_cast<std::size_t>(x / tile_size);
     auto tile_y = static_cast<std::size_t>(y / tile_size);
@@ -52,13 +67,23 @@ void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates&
 
     text.setString(std::format("{}, {}\n{}", tile_y, tile_x, tile_description));
 
-    auto [width, height] = target.getView().getSize();
+    auto current_view = target.getView(); // Save the target's current view for restoring after rendering text
+
+    auto [size_x, size_y] = target.getSize();
+
+    auto text_view = sf::View{sf::FloatRect{{}, {static_cast<float>(size_x), static_cast<float>(size_y)}}};
+
+    target.setView(text_view);
+
+    auto [width, height] = text_view.getSize();
 
     text.setPosition({width - 325, height - 100});
     text.setCharacterSize(24 * 2);
     text.setFillColor(sf::Color::Blue);
 
     target.draw(text, states);
+
+    target.setView(current_view); // Restore previous view
 }
 
 void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -66,12 +91,12 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
     auto tiles = world->get_tiles();
 
-    auto [visible_width, visible_height] = get_visible_area(target.getView(), tiles, tile_size);
+    auto [top_left, bottom_right] = get_visible_area(target.getView(), tiles, tile_size);
 
     sf::RectangleShape rectangle{{tile_size - 1, tile_size - 1}};
 
-    for(auto y = 0uz; y < visible_height; y++) {
-        for(auto x = 0uz; x < visible_width; x++) {
+    for(auto y = top_left.y; y < bottom_right.y; y++) {
+        for(auto x = top_left.x; x < bottom_right.x; x++) {
             auto& tile = tiles[y, x];
 
             sf::Color color{};

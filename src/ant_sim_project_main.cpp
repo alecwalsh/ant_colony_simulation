@@ -38,7 +38,7 @@ int main() {
         while(const auto event = window.pollEvent()) {
             if(event->is<sf::Event::Closed>()) {
                 window.close();
-            } else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
+            } else if(const auto* resized = event->getIf<sf::Event::Resized>()) {
                 auto [new_x, new_y] = resized->size;
 
                 sf::Vector2f new_size = {static_cast<float>(new_x), static_cast<float>(new_y)};
@@ -46,7 +46,7 @@ int main() {
                 auto new_view = sf::View{sf::FloatRect{{}, new_size}};
 
                 window.setView(new_view);
-            } else if (const auto* key = event->getIf<sf::Event::KeyReleased>()) {
+            } else if(const auto* key = event->getIf<sf::Event::KeyReleased>()) {
                 if(key->code == sf::Keyboard::Key::Space) {
                     auto p = sim.paused();
                     sim.pause(!p);
@@ -54,10 +54,10 @@ int main() {
                 if(key->code == sf::Keyboard::Key::Period) {
                     sim.set_state(ant_sim::simulation::simulation_state::single_step);
                 }
-            } else if (const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) {
-                auto [x, y] = mouse_move->position;
+            } else if(const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) {
+                auto [x, y] = window.mapPixelToCoords(mouse_move->position);
 
-                sim.set_mouse_location({static_cast<std::size_t>(x), static_cast<std::size_t>(y)});
+                sim.set_mouse_location({x, y});
             }
         }
 
