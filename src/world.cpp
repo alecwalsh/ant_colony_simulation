@@ -10,14 +10,15 @@ namespace ant_sim {
 void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
     auto tiles = get_tiles();
 
-    std::uniform_int_distribution<std::size_t> location_dist{0, 100};
+    std::uniform_int_distribution<std::size_t> location_dist_x{0, tiles.extent(1) - 1};
+    std::uniform_int_distribution<std::size_t> location_dist_y{0, tiles.extent(0) - 1};
 
     // Randomly place the nests across the world
     for(nest_id_t i = 0; i < nest_count; i++) {
         auto& nest = nests.emplace_back(i);
 
-        auto x = location_dist(rand);
-        auto y = location_dist(rand);
+        auto x = location_dist_x(rand);
+        auto y = location_dist_y(rand);
 
         tiles[y, x].has_nest = true;
         tiles[y, x].nest_id = i;
