@@ -63,6 +63,8 @@ constexpr auto get_neighbors(world& world, point<> location) noexcept {
 // This updates the ant's location field, the has_ant field in the starting tile and destination tile
 // and updates the strength of the pheromone trails
 void ant::move(world& world, point<> new_location) {
+    assert(caste != caste::queen);
+
     // Moving to the current location is a noop
     if(new_location == location) return;
 

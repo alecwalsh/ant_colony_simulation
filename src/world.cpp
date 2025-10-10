@@ -28,14 +28,17 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
         std::println("Nest {} placed at {{{}, {}}}", i, y, x);
     }
 
-    // Randomly place ants around the world
+    // Fill nests with ants
     for(auto& nest : nests) {
         for(auto i = 0uz; i < ant_count; i++) {
+            // Each nest has a single queen
+            auto caste = i == 0 ? ant::caste::queen : ant::caste::worker;
+
             // clang-format off
             ants.push_back({
                 .nest_id = nest.nest_id,
                 .ant_id = static_cast<ant_id_t>(nest.nest_id * ant_count + i),
-                .caste = ant::caste::worker,
+                .caste = caste,
                 .location = nest.location
             });
             // clang-format on
