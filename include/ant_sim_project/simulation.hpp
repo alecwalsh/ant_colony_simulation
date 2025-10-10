@@ -35,6 +35,9 @@ class simulation {
         paused       // The simulation is paused
     };
 
+    float hunger_increase_per_tick = 1.0f;
+    std::uint8_t food_taken = 5; // The amount of food ants take when they encounter a food source
+
   private:
     // All members of this struct must always be accessed via std::atomic_ref, as multiple threads may access them.
     // Each member is independent of the others.  There is no need to pass the entire struct to std::atomic_ref.

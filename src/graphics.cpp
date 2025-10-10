@@ -56,7 +56,7 @@ void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates&
     std::string tile_description;
 
     if(tile.has_nest) {
-        tile_description = std::format("Nest {}", tile.nest_id);
+        tile_description = std::format("Nest {} with {} food", tile.nest_id, world.get_nests()[tile.nest_id].food_supply);
     } else if(tile.has_ant) {
         tile_description = std::format("Ant {} from nest {}", tile.ant_id, world.get_ants()[tile.ant_id].nest_id);
     } else if(tile.food_supply > 0) {
@@ -77,7 +77,7 @@ void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates&
 
     auto [width, height] = text_view.getSize();
 
-    text.setPosition({width - 325, height - 100});
+    text.setPosition({width - 375, height - 100});
     text.setCharacterSize(24 * 2);
     text.setFillColor(sf::Color::Blue);
 

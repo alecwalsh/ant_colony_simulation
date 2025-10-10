@@ -95,24 +95,45 @@ void ant::move(world& world, point<> new_location) {
     // Apply pheromone trails
     current_tile.pheromones.pheromone_strength[nest_id][std::to_underlying(state)] += increase_rate;
 
-    // Switch state to returning to nest
-    // TODO: Collect food
+    // Add some food to the inventory, then set state to returning to nest
     if(new_tile.food_supply != 0) {
-        std::println("Ant {} switching state to returning", ant_id);
+        // Ensure that we don't take more food than the tile contains
+        auto food_taken = std::min(world.sim->food_taken, new_tile.food_supply);
+
+        // The maximum amount of food this ant's inventory has room for
+        food_supply_t max_food_taken = std::numeric_limits<food_supply_t>::max() - food_in_inventory;
+
+        // Ensure that we don't take more food than this ant has room for
+        food_taken = std::min(food_taken, max_food_taken);
+
+        new_tile.food_supply -= food_taken;
+        food_in_inventory += food_taken;
+
         state = state::returning;
+
+        std::println("Ant {} switching state to returning, collected {} food", ant_id, food_taken);
     }
 
     // Ant has returned to its nest
-    // Set state to searching
-    // TODO: Deposit food in nest
+    // Deposit food in the nest, then set state to searching
     if(new_tile.has_nest && new_tile.nest_id == nest_id) {
-        std::println("Ant {} switching state to searching", ant_id);
-        state = state::searching;
+        auto& nest = nests[nest_id];
+
+        // The maximum amount of food this nest's inventory has room for
+        food_supply_t max_food_deposited = std::numeric_limits<food_supply_t>::max() - nest.food_supply;
+
+        // Ensure that we don't take more food than this ant's inventory has room for
+        auto food_deposited = std::min(food_in_inventory, max_food_deposited);
+
+        nest.food_supply += food_deposited;
+        food_in_inventory -= food_deposited;
 
         // Nests can hold multiple ants, so increment this nest's ant count
-        auto& nest = nests[new_tile.nest_id];
-
         nest.ant_count++;
+
+        state = state::searching;
+
+        std::println("Ant {} switching state to searching, deposited {} food", ant_id, 0);
     }
 
     new_tile.has_ant = true;
@@ -222,6 +243,8 @@ void ant::tick(world& world) {
     case caste::queen:
         break;
     case caste::worker: {
+        hunger += world.sim->hunger_increase_per_tick;
+
         auto new_location = calculate_next_location(world).value_or(location);
 
         move(world, new_location);

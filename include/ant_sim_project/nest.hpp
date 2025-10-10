@@ -10,6 +10,8 @@ struct nest {
     std::size_t ant_count;
 
     point<> location;
+
+    food_supply_t food_supply;
 };
 
 }

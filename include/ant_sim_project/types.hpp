@@ -16,6 +16,9 @@ using ant_id_t = std::uint32_t;
 
 using pheromone_strength_t = float;
 
+// This type is used to store the amount of food contained in a tile or in an ant's inventory
+using food_supply_t = std::uint8_t;
+
 // A 2-dimensional point
 template<typename T = std::size_t>
 struct point {

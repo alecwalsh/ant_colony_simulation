@@ -24,6 +24,9 @@ class ant {
 
     enum class state { searching, returning } state;
 
+    float hunger;
+    food_supply_t food_in_inventory;
+
     void tick(world& world);
     void move(world& world, point<> new_location);
 };

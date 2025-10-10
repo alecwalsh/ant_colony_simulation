@@ -35,7 +35,7 @@ struct tile {
     bool has_ant;
     bool has_nest;
 
-    std::uint8_t food_supply;
+    food_supply_t food_supply;
 
     pheromone_trails pheromones;
 
