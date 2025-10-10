@@ -16,7 +16,7 @@ public:
         worker
     } caste;
 
-    point location;
+    point<> location;
 
     enum class state {
         searching,
@@ -24,7 +24,7 @@ public:
     } state;
 
     void tick(world& world);
-    void move(world& world, point new_location);
+    void move(world& world, point<> new_location);
 };
 
 }

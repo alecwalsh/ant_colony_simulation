@@ -16,10 +16,10 @@ constexpr std::size_t max_neighbors = 8;
 
 // Return the neighboring points as an array of std::optional<point>
 // If the neighbor would have been out of bounds, that array element is std::nullopt
-constexpr auto get_neighbors(world& world, point location) noexcept {
+constexpr auto get_neighbors(world& world, point<> location) noexcept {
     auto [x, y] = location;
 
-    std::array<std::optional<point>, max_neighbors> arr = {};
+    std::array<std::optional<point<>>, max_neighbors> arr = {};
 
     auto max_x = world.get_tiles().extent(1) - 1;
     auto max_y = world.get_tiles().extent(0) - 1;
@@ -62,7 +62,7 @@ constexpr auto get_neighbors(world& world, point location) noexcept {
 // Move the ant to a new location
 // This updates the ant's location field, the has_ant field in the starting tile and destination tile
 // and updates the strength of the pheromone trails
-void ant::move(world& world, point new_location) {
+void ant::move(world& world, point<> new_location) {
     auto tiles = world.get_tiles();
 
     auto& current_tile = tiles[location.y, location.x];
@@ -126,13 +126,13 @@ void ant::tick(world& world) {
     auto neighboring_points = get_neighbors(world, location);
 
     auto has_value = []<typename T>(const std::optional<T>& opt) { return opt.has_value(); };
-    auto point_to_tile = [tiles](const std::optional<point>& opt) -> auto& { return tiles[opt->y, opt->x]; };
+    auto point_to_tile = [tiles](const std::optional<point<>>& opt) -> auto& { return tiles[opt->y, opt->x]; };
 
     auto current_tick = world.sim->get_tick_count();
 
     struct result_t {
         float weight;
-        point location;
+        point<> location;
     };
 
     std::optional<result_t> results[max_neighbors] = {};

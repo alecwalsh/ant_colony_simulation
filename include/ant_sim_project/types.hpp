@@ -17,9 +17,10 @@ using ant_id_t = std::uint32_t;
 using pheromone_strength_t = float;
 
 // A 2-dimensional point
+template<typename T = std::size_t>
 struct point {
-    std::size_t x;
-    std::size_t y;
+    T x;
+    T y;
 };
 
 }

@@ -9,7 +9,7 @@ struct nest {
 
     std::size_t ant_count;
 
-    point location;
+    point<> location;
 };
 
 }

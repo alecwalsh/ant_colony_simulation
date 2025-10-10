@@ -52,11 +52,11 @@ void simulation::pause(bool is_paused) noexcept {
     set_state(is_paused ? simulation_state::paused : simulation_state::running);
 }
 
-point simulation::get_mouse_location() const noexcept {
-    return std::atomic_ref{const_cast<point&>(atomically_accessed.mouse_location)};
+point<> simulation::get_mouse_location() const noexcept {
+    return std::atomic_ref{const_cast<point<>&>(atomically_accessed.mouse_location)};
 }
 
-void simulation::set_mouse_location(point location) noexcept {
+void simulation::set_mouse_location(point<> location) noexcept {
     std::atomic_ref{atomically_accessed.mouse_location} = location;
 }
 
