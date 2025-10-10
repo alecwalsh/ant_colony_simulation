@@ -93,7 +93,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
     auto [top_left, bottom_right] = get_visible_area(target.getView(), tiles, tile_size);
 
-    sf::RectangleShape rectangle{{tile_size - 1, tile_size - 1}};
+    sf::RectangleShape rectangle{{tile_size - gap_size, tile_size - gap_size}};
 
     for(auto y = top_left.y; y < bottom_right.y; y++) {
         for(auto x = top_left.x; x < bottom_right.x; x++) {
@@ -129,4 +129,26 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
     draw_text(target, states, *world);
 }
+
+
+void world_drawable::zoom_view(sf::View& view, bool zoom_in) noexcept {
+    float multiplier = zoom_in ? 1 : -1;
+
+    float new_zoom = current_zoom + zoom_increment * multiplier;
+
+    // Zoom must be greater than 0
+    if(new_zoom <= 0) return;
+
+    auto zoom_ratio = current_zoom / new_zoom;
+
+    current_zoom = new_zoom;
+
+    auto size = view.getSize();
+
+    size.x *= zoom_ratio;
+    size.y *= zoom_ratio;
+
+    view.setSize(size);
+}
+
 } // namespace ant_sim::graphics

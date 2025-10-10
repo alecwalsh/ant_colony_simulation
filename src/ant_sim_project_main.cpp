@@ -16,15 +16,15 @@ int main() {
         }
     }, std::ref(sim)};
 
-    unsigned window_width = 800;
-    unsigned window_height = 600;
+    // The default values for window width and height
+    sf::Vector2u default_window_dimensions = {800, 600};
 
     unsigned max_framerate = 60;
 
-    auto view_width = static_cast<float>(window_width);
-    auto view_height = static_cast<float>(window_height);
+    sf::RenderWindow window{sf::VideoMode{default_window_dimensions}, "Ant colony simulation"};
 
-    sf::RenderWindow window{sf::VideoMode{{window_width, window_height}}, "Ant colony simulation"};
+    auto view_width = static_cast<float>(default_window_dimensions.x);
+    auto view_height = static_cast<float>(default_window_dimensions.y);
 
     window.setView(sf::View{sf::FloatRect{{}, {view_width, view_height}}});
 
@@ -50,9 +50,22 @@ int main() {
                 if(key->code == sf::Keyboard::Key::Space) {
                     auto p = sim.paused();
                     sim.pause(!p);
-                }
-                if(key->code == sf::Keyboard::Key::Period) {
+                } else if(key->code == sf::Keyboard::Key::Period) {
                     sim.set_state(ant_sim::simulation::simulation_state::single_step);
+                }
+            } else if(const auto* key = event->getIf<sf::Event::KeyPressed>()) {
+                if(key->code == sf::Keyboard::Key::Equal) {
+                    auto view = window.getView();
+
+                    world_drawable.zoom_view(view, true);
+
+                    window.setView(view);
+                } else if(key->code == sf::Keyboard::Key::Hyphen) {
+                    auto view = window.getView();
+
+                    world_drawable.zoom_view(view, false);
+
+                    window.setView(view);
                 }
             } else if(const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) {
                 auto [x, y] = window.mapPixelToCoords(mouse_move->position);
