@@ -33,10 +33,16 @@ void simulation::tick() {
     }
 }
 
-simulation::simulation_state simulation::get_state() const noexcept {
-    // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
-    return std::atomic_ref{const_cast<simulation_state&>(atomically_accessed.state)};
+template <typename T>
+// Atomically read a reference
+// libc++ doesn't support atomic_ref<T> with const T yet
+// This function works around it with a const_cast
+// This is safe because no attempt is made to modify the value
+T atomic_read(const T& t) noexcept {
+    return std::atomic_ref{const_cast<T&>(t)};
 }
+
+simulation::simulation_state simulation::get_state() const noexcept { return atomic_read(atomically_accessed.state); }
 
 void simulation::set_state(simulation_state new_state) noexcept {
     std::atomic_ref{atomically_accessed.state} = new_state;
@@ -52,17 +58,12 @@ void simulation::pause(bool is_paused) noexcept {
     set_state(is_paused ? simulation_state::paused : simulation_state::running);
 }
 
-point<float> simulation::get_mouse_location() const noexcept {
-    return std::atomic_ref{const_cast<point<float>&>(atomically_accessed.mouse_location)};
-}
+point<float> simulation::get_mouse_location() const noexcept { return atomic_read(atomically_accessed.mouse_location); }
 
 void simulation::set_mouse_location(point<float> location) noexcept {
     std::atomic_ref{atomically_accessed.mouse_location} = location;
 }
 
-tick_t simulation::get_tick_count() const noexcept {
-    // libc++ doesn't yet support atomic_ref<T> with const T, so work around it with const_cast
-    return std::atomic_ref{const_cast<tick_t&>(atomically_accessed.tick_count)};
-}
+tick_t simulation::get_tick_count() const noexcept { return atomic_read(atomically_accessed.tick_count); }
 
 } // namespace ant_sim
