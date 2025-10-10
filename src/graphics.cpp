@@ -151,4 +151,13 @@ void world_drawable::zoom_view(sf::View& view, bool zoom_in) noexcept {
     view.setSize(size);
 }
 
+void world_drawable::pan_view(sf::View& view, point<float> amount) noexcept {
+    auto center = view.getCenter();
+
+    center.x += amount.x;
+    center.y += amount.y;
+
+    view.setCenter(center);
+}
+
 } // namespace ant_sim::graphics

@@ -54,19 +54,25 @@ int main() {
                     sim.set_state(ant_sim::simulation::simulation_state::single_step);
                 }
             } else if(const auto* key = event->getIf<sf::Event::KeyPressed>()) {
-                if(key->code == sf::Keyboard::Key::Equal) {
-                    auto view = window.getView();
+                auto view = window.getView();
 
+                float pan_amount = 25;
+
+                if(key->code == sf::Keyboard::Key::Left) {
+                    ant_sim::graphics::world_drawable::pan_view(view, {-pan_amount, 0});
+                } else if(key->code == sf::Keyboard::Key::Right) {
+                    ant_sim::graphics::world_drawable::pan_view(view, {pan_amount, 0});
+                } else if(key->code == sf::Keyboard::Key::Up) {
+                    ant_sim::graphics::world_drawable::pan_view(view, {0, -pan_amount});
+                } else if(key->code == sf::Keyboard::Key::Down) {
+                    ant_sim::graphics::world_drawable::pan_view(view, {0, pan_amount});
+                } if(key->code == sf::Keyboard::Key::Equal) {
                     world_drawable.zoom_view(view, true);
-
-                    window.setView(view);
                 } else if(key->code == sf::Keyboard::Key::Hyphen) {
-                    auto view = window.getView();
-
                     world_drawable.zoom_view(view, false);
-
-                    window.setView(view);
                 }
+
+                window.setView(view);
             } else if(const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) {
                 auto [x, y] = window.mapPixelToCoords(mouse_move->position);
 
