@@ -35,7 +35,7 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
             ants.push_back({
                 .nest_id = nest.nest_id,
                 .ant_id = static_cast<ant_id_t>(nest.nest_id * ant_count + i),
-                .caste = ant::caste::queen,
+                .caste = ant::caste::worker,
                 .location = nest.location
             });
             // clang-format on

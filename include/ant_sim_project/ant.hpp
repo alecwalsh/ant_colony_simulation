@@ -1,30 +1,31 @@
 #pragma once
 
+#include <optional>
+
 #include "types.hpp"
 
 namespace ant_sim {
 
+struct tile;
 class world;
 
 class ant {
-public:
+    std::optional<point<>> calculate_next_location(world& world);
+
+    float calculate_tile_weight(const tile& tile, world& world) noexcept;
+
+  public:
     nest_id_t nest_id;
     ant_id_t ant_id;
 
-    enum class caste {
-        queen,
-        worker
-    } caste;
+    enum class caste { queen, worker } caste;
 
     point<> location;
 
-    enum class state {
-        searching,
-        returning
-    } state;
+    enum class state { searching, returning } state;
 
     void tick(world& world);
     void move(world& world, point<> new_location);
 };
 
-}
+} // namespace ant_sim

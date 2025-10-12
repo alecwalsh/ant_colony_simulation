@@ -21,6 +21,8 @@ template<typename T = std::size_t>
 struct point {
     T x;
     T y;
+
+    bool operator==(const point&) const = default;
 };
 
 }
