@@ -7,7 +7,7 @@ namespace ant_sim::graphics {
 // Returns the top left and bottom right tiles of the visible area
 // This does not account for rotated views
 static std::pair<point<>, point<>> get_visible_area(const sf::View& view,
-                                                stdex::mdspan<world::tile, stdex::dextents<std::size_t, 2>> tiles,
+                                                stdex::mdspan<tile, stdex::dextents<std::size_t, 2>> tiles,
                                                 float tile_size) {
     auto [view_width, view_height] = view.getSize();
     auto [center_x, center_y] = view.getCenter();
