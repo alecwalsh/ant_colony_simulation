@@ -111,7 +111,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
             } else if(tile.has_ant) {
                 color = {255, 255, 255};
             } else if(tile.food_supply > 0) {
-                color = {0, 255, 0};
+                color = {0, static_cast<std::uint8_t>(tile.food_supply), 0};
             } else {
                 auto red = tile.pheromones.pheromone_strength[0][0];
 
