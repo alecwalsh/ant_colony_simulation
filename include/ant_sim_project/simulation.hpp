@@ -45,9 +45,11 @@ class simulation {
 
     float hunger_increase_per_tick = 1.0f;
     std::uint8_t food_taken = 5; // The amount of food ants take when they encounter a food source
+    food_supply_t food_per_new_ant = 150;
 
     std::minstd_rand rng;
 
+private:
     std::size_t rows;
     std::size_t columns;
 
@@ -55,8 +57,7 @@ class simulation {
 
     std::unordered_map<ant_id_t, ant> ants;
     std::vector<nest> nests;
-
-  private:
+    
     // All members of this struct must always be accessed via std::atomic_ref, as multiple threads may access them.
     // Each member is independent of the others.  There is no need to pass the entire struct to std::atomic_ref.
     struct {
@@ -70,6 +71,12 @@ class simulation {
         bool log_ant_movements = false;
         bool log_ant_state_changes = false;
     } atomically_accessed;
+
+    // Holds new ants that have not yet been added to the simulation
+    std::vector<ant> new_ants;
+
+    // The lowest unused id
+    ant_id_t next_id = 0;
 
   public:
     simulation(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count_per_nest,
@@ -114,6 +121,13 @@ class simulation {
     static void update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id);
 
     void generate(nest_id_t nest_count, ant_id_t ant_count);
+
+    // Queues the addition of a new worker ant to the nest with id nest_id
+    // This is done because inserting into a std::unordered_map while iterating is difficult
+    void queue_ant(nest_id_t nest_id);
+
+    // Adds a new worker ant to the nest with id new_ant.nest_id
+    void add_ant(ant new_ant);
 
     void tick();
 };

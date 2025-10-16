@@ -62,7 +62,7 @@ constexpr auto get_neighbors(simulation& sim, point<> location) noexcept {
 // This updates the ant's location field, the has_ant field in the starting tile and destination tile
 // and updates the strength of the pheromone trails
 void ant::move(simulation& sim, point<> new_location) {
-    assert(caste != caste::queen);
+    assert(caste != caste::queen); // Queens should stay at their nest
 
     // Moving to the current location is a noop
     if(new_location == location) return;
@@ -148,7 +148,7 @@ void ant::move(simulation& sim, point<> new_location) {
 }
 
 // Calculate the weight for a tile, from the perspective of current_ant
-float ant::calculate_tile_weight(const tile& tile, simulation& sim) noexcept {
+float ant::calculate_tile_weight(const tile& tile, simulation& sim) const noexcept {
     float multiplier = state == state::searching ? 1 : -1;
 
     // Tile has food
@@ -246,8 +246,18 @@ std::optional<point<>> ant::calculate_next_location(simulation& sim) {
 // When the ant is returning to the nest it behaves the same, but with its pheromone preferences flipped
 void ant::tick(simulation& sim) {
     switch(caste) {
-    case caste::queen:
+    case caste::queen: {
+        auto& nest = sim.get_nests()[nest_id];
+
+        // Add a new ant at the cost of food
+        if(nest.food_supply >= sim.food_per_new_ant) {
+            sim.queue_ant(nest_id);
+
+            nest.food_supply -= sim.food_per_new_ant;
+        }
+
         break;
+    }
     case caste::worker: {
         hunger += sim.hunger_increase_per_tick;
 

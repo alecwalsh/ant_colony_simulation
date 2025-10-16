@@ -12,7 +12,7 @@ class simulation;
 class ant {
     std::optional<point<>> calculate_next_location(simulation& world);
 
-    float calculate_tile_weight(const tile& tile, simulation& world) noexcept;
+    float calculate_tile_weight(const tile& tile, simulation& world) const noexcept;
 
   public:
     nest_id_t nest_id;

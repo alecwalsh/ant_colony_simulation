@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <print>
+#include <ranges>
 
 namespace ant_sim {
 
@@ -41,6 +42,24 @@ simulation::simulation(std::size_t rows, std::size_t columns, nest_id_t nest_cou
     ants.reserve(ant_count_per_nest);
 
     generate(nest_count, ant_count_per_nest);
+}
+
+void simulation::queue_ant(nest_id_t nest_id) {
+    // clang-format off
+    new_ants.push_back({
+        .nest_id = nest_id,
+        .ant_id = next_id++,
+        .caste = ant::caste::worker,
+        .location = nests[nest_id].location
+    });
+    // clang-format on
+}
+
+void simulation::add_ant(ant new_ant) {
+    auto [it, inserted] = ants.insert({new_ant.ant_id, new_ant});
+    assert(inserted);
+
+    nests[new_ant.nest_id].ant_count++;
 }
 
 void simulation::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
@@ -90,6 +109,8 @@ void simulation::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
         }
     }
 
+    next_id = ant_count_per_nest * nest_count;
+
     // Randomly place food across the world
     std::uniform_real_distribution<float> food_dist{};
 
@@ -124,9 +145,15 @@ void simulation::update_pheromones(tile::pheromone_trails& pheromone_trails, tic
 void simulation::tick() {
     if(paused()) return;
 
-    for(auto& [ant_id, ant] : get_ants()) {
+    for(auto& ant : ants | std::views::values) {
         ant.tick(*this);
     }
+
+    for(auto& new_ant : new_ants) {
+        add_ant(new_ant);
+    }
+
+    new_ants.clear();
 
     ++std::atomic_ref{atomically_accessed.tick_count};
 
