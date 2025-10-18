@@ -7,7 +7,7 @@
 #include <print>
 
 namespace ant_sim {
-void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
+void world::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
     auto tiles = get_tiles();
 
     std::uniform_int_distribution<std::size_t> location_dist_x{0, tiles.extent(1) - 1};
@@ -30,11 +30,11 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
 
     // Fill nests with ants
     for(auto& nest : nests) {
-        for(auto i = 0uz; i < ant_count; i++) {
+        for(auto i = 0uz; i < ant_count_per_nest; i++) {
             // Each nest has a single queen
             auto caste = i == 0 ? ant::caste::queen : ant::caste::worker;
 
-            auto ant_id = static_cast<ant_id_t>(nest.nest_id * ant_count + i);
+            auto ant_id = static_cast<ant_id_t>(nest.nest_id * ant_count_per_nest + i);
             // clang-format off
             ants[ant_id] = {
                 .nest_id = nest.nest_id,
@@ -66,19 +66,37 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
     }
 }
 
-// TODO: allow specifying RNG seed
-world::world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count)
-    : rows{rows}, columns{columns}, tiles(rows * columns), rand{std::random_device{}()}, sim{sim} {
+world::world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count_per_nest,
+             std::optional<std::uint64_t> seed)
+    : rows{rows}, columns{columns}, tiles(rows * columns), sim{sim} {
     if(nest_count > tile::max_nests) {
         auto error_string =
             std::format("Error: {} nests is greater than the maximum of {}", nest_count, tile::max_nests);
         throw std::runtime_error{error_string};
     }
 
-    nests.reserve(nest_count);
-    ants.reserve(ant_count);
+    std::uint32_t seed_parts[2];
 
-    generate(nest_count, ant_count);
+    if(seed) {
+        // std::seed_seq only uses the low 32 bits of each input, so break the seed into 2 32 bit values
+        seed_parts[0] = *seed >> 32;
+        seed_parts[1] = *seed & 0xFFFFFFFF;
+    } else {
+        std::random_device random_device;
+
+        seed_parts[0] = random_device();
+        seed_parts[1] = random_device();
+    }
+
+    std::seed_seq seed_seq{seed_parts[0], seed_parts[1]};
+    rand.seed(seed_seq);
+
+    std::println("Using seed {}", static_cast<std::uint64_t>(seed_parts[0]) << 32 | seed_parts[1]);
+
+    nests.reserve(nest_count);
+    ants.reserve(ant_count_per_nest);
+
+    generate(nest_count, ant_count_per_nest);
 }
 
 void world::update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id) {

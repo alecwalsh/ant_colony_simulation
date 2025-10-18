@@ -57,7 +57,7 @@ class simulation {
   public:
     [[nodiscard]] auto get_world(this auto&& self) noexcept { return mutex_guard{&self.sim_world, self.mutex}; }
 
-    simulation(std::size_t rows, std::size_t columns);
+    simulation(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count_per_nest, std::optional<std::uint64_t> seed = {});
 
     [[nodiscard]] simulation_state get_state() const noexcept;
     void set_state(simulation_state new_state) noexcept;

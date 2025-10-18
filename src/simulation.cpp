@@ -7,7 +7,9 @@
 
 namespace ant_sim {
 
-simulation::simulation(std::size_t rows, std::size_t columns) : sim_world{rows, columns, this} {}
+simulation::simulation(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count_per_nest,
+                       std::optional<std::uint64_t> seed)
+    : sim_world{rows, columns, this, nest_count, ant_count_per_nest, seed} {}
 
 void simulation::tick() {
     if(paused()) return;
@@ -64,9 +66,7 @@ void simulation::set_mouse_location(point<float> location) noexcept {
     std::atomic_ref{atomically_accessed.mouse_location} = location;
 }
 
-bool simulation::get_log_ant_movements() const noexcept {
-    return atomic_read(atomically_accessed.log_ant_movements);
-}
+bool simulation::get_log_ant_movements() const noexcept { return atomic_read(atomically_accessed.log_ant_movements); }
 
 void simulation::set_log_ant_movements(bool log_ant_movements) noexcept {
     std::atomic_ref{atomically_accessed.log_ant_movements} = log_ant_movements;

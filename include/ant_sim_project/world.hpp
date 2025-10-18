@@ -60,7 +60,7 @@ class world {
     // TODO: Merge simulation and world classes
     simulation* sim;
 
-    world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count = 1, ant_id_t ant_count = 10);
+    world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count_per_nest, std::optional<std::uint64_t> seed = {});
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {

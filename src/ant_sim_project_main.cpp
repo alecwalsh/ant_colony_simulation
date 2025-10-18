@@ -5,12 +5,32 @@
 
 #include <thread>
 #include <functional>
+#include <print>
+#include <span>
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-int main() {
-    ant_sim::simulation sim{100, 100};
+auto parse_args(std::span<const char*> args) {
+    assert(!args.empty());
+
+    std::uint64_t seed = std::stoull(args[0]);
+
+    for(auto arg : args.subspan(1)) {
+        std::println("{}", arg);
+    }
+
+    return seed;
+}
+
+int main(int argc, char* argv[]) {
+    std::optional<std::uint64_t> seed;
+
+    if(argc > 1) {
+        seed = parse_args(std::span{const_cast<const char**>(argv) + 1, static_cast<std::size_t>(argc - 1)});
+    }
+
+    ant_sim::simulation sim{100, 100, 1, 10, seed};
 
     std::jthread simulation_thread{[](const std::stop_token& stop_token, ant_sim::simulation& sim) {
         while(!sim.stopped() && !stop_token.stop_requested()) {
