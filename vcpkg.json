@@ -1,12 +1,16 @@
 {
   "name": "ant-sim-project",
   "version": "0.0.0.1",
-
   "dependencies": [
     {
       "name": "sfml",
       "version>=": "3.0.1"
-    }, {
+    },
+    {
+      "name": "imgui-sfml",
+      "version>=": "3.0#1"
+    },
+    {
       "name": "mdspan",
       "version>=": "0.6.0"
     }

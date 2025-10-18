@@ -1,3 +1,5 @@
+#include "ant_sim_project/gui.hpp"
+
 #include <ant_sim_project/simulation.hpp>
 #include <ant_sim_project/graphics.hpp>
 
@@ -6,6 +8,11 @@
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+
+#include <imgui.h>
+#include <imgui-SFML.h>
+
+#include <print>
 
 int main() {
     ant_sim::simulation sim{100, 100};
@@ -32,10 +39,15 @@ int main() {
 
     ant_sim::graphics::world_drawable world_drawable{&sim};
 
-    while(window.isOpen()) {
-        window.clear(sf::Color::Black);
+    ant_sim::gui::gui gui{window, sim};
 
+    sf::Clock clock;
+
+    while(window.isOpen()) {
         while(const auto event = window.pollEvent()) {
+            // Make sure ImGui knows about any inputs
+            ImGui::SFML::ProcessEvent(window, *event);
+
             if(event->is<sf::Event::Closed>()) {
                 window.close();
             } else if(const auto* resized = event->getIf<sf::Event::Resized>()) {
@@ -80,7 +92,17 @@ int main() {
             }
         }
 
+        // ImGui doesn't like it when we try to render after closing the window
+        if(!window.isOpen()) break;
+
+        window.clear();
+
+        gui.draw_gui(clock.restart());
+
         window.draw(world_drawable);
+        // Display the GUI and end the ImGui frame
+        gui.render();
+
         window.display();
     }
 }
