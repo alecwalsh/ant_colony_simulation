@@ -113,7 +113,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
             } else if(tile.food_supply > 0) {
                 color = {0, static_cast<std::uint8_t>(tile.food_supply), 0};
             } else {
-                auto red = tile.pheromones.pheromone_strength[0][0];
+                auto red = tile.pheromones.pheromone_strength[visible_pheromone_nest_id][visible_pheromone_type];
 
                 red = static_cast<pheromone_strength_t>(std::clamp(static_cast<float>(red) * 30.0f, 0.0f, 255.0f));
 

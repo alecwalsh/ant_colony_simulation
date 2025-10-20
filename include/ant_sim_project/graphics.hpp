@@ -23,6 +23,9 @@ class world_drawable : public sf::Drawable {
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
   public:
+    std::size_t visible_pheromone_type = 0;
+    nest_id_t visible_pheromone_nest_id = 0;
+
     explicit world_drawable(simulation* sim, float tile_size = 10,
                             const std::filesystem::path& font_path = "../../../data/ProggyTiny.ttf") noexcept
         : sim{sim}, tile_size{tile_size}, font{font_path} {}

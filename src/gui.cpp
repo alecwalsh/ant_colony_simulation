@@ -8,7 +8,8 @@
 
 namespace ant_sim::gui {
 
-gui::gui(sf::RenderWindow& window, simulation& sim) : window{&window}, sim{&sim} {
+gui::gui(sf::RenderWindow& window, simulation& sim, graphics::world_drawable& world_drawable)
+    : window{&window}, sim{&sim}, world_drawable{&world_drawable} {
     if(imgui_initialized) {
         throw std::runtime_error{"Dear ImGui has already been initialized"};
     }
@@ -24,10 +25,20 @@ void gui::draw_gui(sf::Time delta_time) {
     // Begin a new ImGui frame
     ImGui::SFML::Update(*window, delta_time);
 
-    ImGui::Begin("Simulation control");
-    if(ImGui::Button("Change visible pheromones")) {
-        // TODO: Implement
+    ImGui::Begin("Simulation visualization control");
+
+    if(ImGui::Button("Toggle visible pheromone type")) {
+        world_drawable->visible_pheromone_type = world_drawable->visible_pheromone_type == 0 ? 1 : 0;
     }
+
+    ImGui::Text("Currently displaying pheromones from nest %u", world_drawable->visible_pheromone_nest_id);
+
+    auto nest_count = static_cast<nest_id_t>(sim->get_world()->get_nests().size());
+
+    int i = world_drawable->visible_pheromone_nest_id;
+    ImGui::SliderInt("Change visible pheromone nest", &i, 0, nest_count - 1);
+    world_drawable->visible_pheromone_nest_id = static_cast<nest_id_t>(i);
+
     ImGui::End();
 
     ImGui::Begin("Simulation stats");
@@ -35,9 +46,7 @@ void gui::draw_gui(sf::Time delta_time) {
     ImGui::End();
 }
 
-void gui::render() {
-    ImGui::SFML::Render(*window);
-}
+void gui::render() { ImGui::SFML::Render(*window); }
 
 gui::~gui() {
     ImGui::SFML::Shutdown(*window);
@@ -45,4 +54,4 @@ gui::~gui() {
     imgui_initialized = false;
 }
 
-}
+} // namespace ant_sim::gui

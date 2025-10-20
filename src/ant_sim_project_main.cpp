@@ -39,7 +39,7 @@ int main() {
 
     ant_sim::graphics::world_drawable world_drawable{&sim};
 
-    ant_sim::gui::gui gui{window, sim};
+    ant_sim::gui::gui gui{window, sim, world_drawable};
 
     sf::Clock clock;
 

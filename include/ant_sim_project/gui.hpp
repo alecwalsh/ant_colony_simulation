@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics.hpp"
 #include "simulation.hpp"
 
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -12,8 +13,9 @@ class gui {
 
     sf::RenderWindow* window;
     simulation* sim;
+    graphics::world_drawable* world_drawable;
 public:
-    gui(sf::RenderWindow& window, simulation& sim);
+    gui(sf::RenderWindow& window, simulation& sim, graphics::world_drawable& world_drawable);
 
     void draw_gui(sf::Time delta_time);
     void render();

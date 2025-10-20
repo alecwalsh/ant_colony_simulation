@@ -67,9 +67,10 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
 
 // TODO: allow specifying RNG seed
 world::world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count)
-: rows{rows}, columns{columns}, tiles(rows * columns), rand{std::random_device{}()}, sim{sim} {
+    : rows{rows}, columns{columns}, tiles(rows * columns), rand{std::random_device{}()}, sim{sim} {
     if(nest_count > tile::max_nests) {
-        auto error_string = std::format("Error: {} nests is greater than the maximum of {}", nest_count, tile::max_nests);
+        auto error_string =
+            std::format("Error: {} nests is greater than the maximum of {}", nest_count, tile::max_nests);
         throw std::runtime_error{error_string};
     }
 
