@@ -9,11 +9,6 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-#include <imgui.h>
-#include <imgui-SFML.h>
-
-#include <print>
-
 int main() {
     ant_sim::simulation sim{100, 100};
 
@@ -45,8 +40,8 @@ int main() {
 
     while(window.isOpen()) {
         while(const auto event = window.pollEvent()) {
-            // Make sure ImGui knows about any inputs
-            ImGui::SFML::ProcessEvent(window, *event);
+            // Make sure the GUI knows about any inputs
+            gui.process_event(*event);
 
             if(event->is<sf::Event::Closed>()) {
                 window.close();

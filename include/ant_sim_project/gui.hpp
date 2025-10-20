@@ -17,6 +17,9 @@ class gui {
 public:
     gui(sf::RenderWindow& window, simulation& sim, graphics::world_drawable& world_drawable);
 
+
+    void process_event(const sf::Event& event);
+
     void draw_gui(sf::Time delta_time);
     void render();
 

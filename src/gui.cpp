@@ -21,6 +21,10 @@ gui::gui(sf::RenderWindow& window, simulation& sim, graphics::world_drawable& wo
     imgui_initialized = true;
 }
 
+void gui::process_event(const sf::Event& event) {
+    ImGui::SFML::ProcessEvent(*window, event);
+}
+
 void gui::draw_gui(sf::Time delta_time) {
     // Begin a new ImGui frame
     ImGui::SFML::Update(*window, delta_time);
