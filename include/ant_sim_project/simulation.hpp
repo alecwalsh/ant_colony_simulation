@@ -45,6 +45,8 @@ class simulation {
         tick_t tick_count = 0;
         simulation_state state = simulation_state::running;
         point<float> mouse_location = {0, 0};
+        bool log_ant_movements = false;
+        bool log_ant_state_changes = false;
     } atomically_accessed;
 
     // Must be accessed through get_world, not directly, even within this class
@@ -72,6 +74,12 @@ class simulation {
 
     point<float> get_mouse_location() const noexcept;
     void set_mouse_location(point<float> location) noexcept;
+
+    bool get_log_ant_movements() const noexcept;
+    void set_log_ant_movements(bool log_ant_movements) noexcept;
+
+    bool get_log_ant_state_changes() const noexcept;
+    void set_log_ant_state_changes(bool log_ant_state_changes) noexcept;
 
     [[nodiscard]] tick_t get_tick_count() const noexcept;
 

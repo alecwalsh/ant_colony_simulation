@@ -64,6 +64,22 @@ void simulation::set_mouse_location(point<float> location) noexcept {
     std::atomic_ref{atomically_accessed.mouse_location} = location;
 }
 
+bool simulation::get_log_ant_movements() const noexcept {
+    return atomic_read(atomically_accessed.log_ant_movements);
+}
+
+void simulation::set_log_ant_movements(bool log_ant_movements) noexcept {
+    std::atomic_ref{atomically_accessed.log_ant_movements} = log_ant_movements;
+}
+
+bool simulation::get_log_ant_state_changes() const noexcept {
+    return atomic_read(atomically_accessed.log_ant_state_changes);
+}
+
+void simulation::set_log_ant_state_changes(bool log_ant_state_changes) noexcept {
+    std::atomic_ref{atomically_accessed.log_ant_state_changes} = log_ant_state_changes;
+}
+
 tick_t simulation::get_tick_count() const noexcept { return atomic_read(atomically_accessed.tick_count); }
 
 } // namespace ant_sim

@@ -111,7 +111,9 @@ void ant::move(world& world, point<> new_location) {
 
         state = state::returning;
 
-        std::println("Ant {} switching state to returning, collected {} food", ant_id, food_taken);
+        if(world.sim->get_log_ant_state_changes()) {
+            std::println("Ant {} switching state to returning, collected {} food", ant_id, food_taken);
+        }
     }
 
     // Ant has returned to its nest
@@ -133,7 +135,9 @@ void ant::move(world& world, point<> new_location) {
 
         state = state::searching;
 
-        std::println("Ant {} switching state to searching, deposited {} food", ant_id, 0);
+        if(world.sim->get_log_ant_state_changes()) {
+            std::println("Ant {} switching state to searching, deposited {} food", ant_id, 0);
+        }
     }
 
     new_tile.has_ant = true;
@@ -229,7 +233,9 @@ std::optional<point<>> ant::calculate_next_location(world& world) {
 
     assert(!(tiles[new_location.y, new_location.x].is_full()));
 
-    std::println("moving ant {} to {{{}, {}}} with weight {}", ant_id, new_location.x, new_location.y, weight);
+    if(world.sim->get_log_ant_movements()) {
+        std::println("Moving ant {} to {{{}, {}}} with weight {}", ant_id, new_location.x, new_location.y, weight);
+    }
 
     return new_location;
 }

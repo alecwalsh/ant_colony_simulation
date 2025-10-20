@@ -90,10 +90,6 @@ void world::update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t c
 
         auto decrease = falloff_rate * ticks_since_last_update;
 
-        if(decrease > 0.1f) {
-            std::println("decrease: {}", decrease);
-        }
-
         if(falloff_rate * decrease > strength) {
             strength = 0;
         } else {
