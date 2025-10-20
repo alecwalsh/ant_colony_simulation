@@ -112,7 +112,8 @@ void ant::move(world& world, point<> new_location) {
         state = state::returning;
 
         if(world.sim->get_log_ant_state_changes()) {
-            std::println("Ant {} switching state to returning, collected {} food", ant_id, food_taken);
+            std::println("Ant {} at {{{}, {}}} switching state to returning, collected {} food", ant_id, location.x,
+                         location.y, food_taken);
         }
     }
 
@@ -136,7 +137,8 @@ void ant::move(world& world, point<> new_location) {
         state = state::searching;
 
         if(world.sim->get_log_ant_state_changes()) {
-            std::println("Ant {} switching state to searching, deposited {} food", ant_id, 0);
+            std::println("Ant {} at {{{}, {}}} switching state to searching, deposited {} food", ant_id, location.x,
+                         location.y, food_deposited);
         }
     }
 
@@ -145,7 +147,6 @@ void ant::move(world& world, point<> new_location) {
 
     location = new_location;
 }
-
 
 // Calculate the weight for a tile, from the perspective of current_ant
 float ant::calculate_tile_weight(const tile& tile, world& world) noexcept {
