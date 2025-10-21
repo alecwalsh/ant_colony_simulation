@@ -14,7 +14,7 @@ void simulation::tick() {
 
     auto world = get_world();
 
-    for(auto& ant : world->get_ants()) {
+    for(auto& [ant_id, ant] : world->get_ants()) {
         ant.tick(*world);
     }
 

@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <random>
 #include <vector>
+#include <unordered_map>
 #include <span>
 
 #include <experimental/mdspan>
@@ -48,7 +49,7 @@ class world {
 
     std::vector<tile> tiles;
 
-    std::vector<ant> ants;
+    std::unordered_map<ant_id_t, ant> ants;
     std::vector<nest> nests;
 
     void generate(nest_id_t nest_count, ant_id_t ant_count);
@@ -66,8 +67,8 @@ class world {
         return stdex::mdspan{self.tiles.data(), self.rows, self.columns};
     }
 
-    // Returns a std::span referring to ants
-    [[nodiscard]] auto get_ants(this auto&& self) noexcept { return std::span{self.ants}; }
+    // Returns a reference to ants
+    [[nodiscard]] auto& get_ants(this auto&& self) noexcept { return self.ants; }
 
     // Returns a std::span referring to nests
     [[nodiscard]] auto get_nests(this auto&& self) noexcept { return std::span{self.nests}; }

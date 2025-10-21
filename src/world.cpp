@@ -34,22 +34,23 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count) {
             // Each nest has a single queen
             auto caste = i == 0 ? ant::caste::queen : ant::caste::worker;
 
+            auto ant_id = static_cast<ant_id_t>(nest.nest_id * ant_count + i);
             // clang-format off
-            ants.push_back({
+            ants[ant_id] = {
                 .nest_id = nest.nest_id,
-                .ant_id = static_cast<ant_id_t>(nest.nest_id * ant_count + i),
+                .ant_id = ant_id,
                 .caste = caste,
                 .location = nest.location,
                 .state = ant::state::searching,
                 .hunger = 0
-            });
+            };
             // clang-format on
 
             nest.ant_count++;
 
             auto& tile = tiles[nest.location.y, nest.location.x];
             tile.has_ant = true;
-            tile.ant_id = ants.back().ant_id;
+            tile.ant_id = ant_id;
         }
     }
 
