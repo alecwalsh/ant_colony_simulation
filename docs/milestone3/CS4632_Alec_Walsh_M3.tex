@@ -1,0 +1,214 @@
+\documentclass{article}
+
+\usepackage{hyperref}
+\usepackage{graphicx} % Required for inserting images
+
+\title{Ant Colony Simulation Project Milestone 3}
+\author{Alec Walsh}
+\date{October 23 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Implementation Summary}
+
+I have finished all of the basic elements of the simulation, with a couple exceptions noted below, and implemented mechanisms for collecting data from simulation runs.
+
+\subsection{Scope changes}
+
+There have been a couple minor changes in scope compared to the initial proposal.
+
+\begin{itemize}
+\item There are only two castes, workers and queens.  The initial proposal included a drone caste.  In real life, ants reproduce sexually, and ant drones are the fertile males.  This simulation does not simulate genetics, however, and all ants of a given caste are identical.  This makes drones mostly useless.
+\item Customizing the display colors for different pheromone types at runtime is not implemented.  The original purpose of this feature was to make it easier to visualize what is happening.
+
+I have instead implemented the ability to change which pheromone type is visible and which nests have their pheromones displayed, which I believe is easier to visualize.
+\end{itemize}
+
+\subsection{Features implemented since the last milestone}
+
+\begin{itemize}
+
+    \item Reproduction: Queen ants now produce workers at the cost of food.  The amount of food required is configurable.
+    \item Hunger:  Ants starve if they go without food for too long.  The hunger increase per tick and the hunger level that results in death are configurable.
+    \item Time control: Pausing, resuming, single stepping, and changing the simulation speed.  Pausing and resuming is done with space, and single stepping is done with period.  The simulation speed is changeable in the Simulation Control window.
+    \item Panning and zooming the view.  Panning is done with the arrow keys, and zooming is done with + and -.
+    \item The executable accepts command line arguments that set initial values for the simulation settings.
+    \item The simulation now has a GUI.  It has several windows.
+    \begin{itemize}
+
+    \item The Simulation Control window allows changing various parameters at runtime.
+    \item The Simulation Stats window shows live statistics, including the tick count and ant population.
+    \item The Current Tile Info window shows the contents of the tile under the cursor.
+
+\end{itemize}
+
+\item The pathfinding configuration has been modified to avoid some of the problems mentioned in the previous milestone.
+
+\end{itemize}
+
+Screenshot from one of the test runs, showing the new GUI:
+
+\includegraphics[width=0.9\textwidth]{screenshot1.png}
+
+\section{Implementation details}
+
+\subsection{Pheromone update function}
+
+Every tile contains a two-dimensional array of pheromone strengths.  Each row of the array represents a different nest.  There are two columns, corresponding to the two pheromone types.
+
+The pheromone strengths on each tile decrease on every tick of the simulation.  Because there are a potentially large number of tiles, this updating is done lazily.  Each tile stores a timestamp indicating when it was last updated.  The actual updated is deferred until an ant needs to read the pheromone strengths of that tile.
+
+\subsection{Pathfinding function}
+
+The pathfinding function used by ants operates based on information available locally.  The adjacent tiles, including diagonally adjacent tiles, are found.  Tiles that are out of bounds or occupied are excluded.
+
+A weight is calculated for each tile, and the tile with the highest weight is chosen as the ant's next location.
+
+If the tile is a food source or is the ant's nest, then a weight of infinity or negative infinity is used as the weight, and the following steps are skipped.  Whether positive or negative infinity is used depends on the ant's current state.  This causes ants that are searching for food to strongly avoid their nest and strongly prefer food sources.  Ants that are returning to their nest with food do the opposite.
+
+For non-food, non-nest, tiles, calculating the weight is done as follows:
+
+\begin{enumerate}
+
+    \item Retrieve the pheromone strength for the current tile and current ant's nest.
+    \item Add a random value to it.  This ensures that tiles with a strength of 0 still have a chance of being chosen.
+    \item Multiply it by another random value.
+    \item Multiply it by the avoidance factor.  This value controls how strongly ants avoid backtracking, and depends on the ant's current state.
+
+\end{enumerate}
+
+This process is done for both pheromone types, and the difference is taken.
+
+The code for this is simple:
+
+\begin{verbatim}
+    float type1_strength = tile.pheromones.pheromone_strength[nest_id][0];
+    float type2_strength = tile.pheromones.pheromone_strength[nest_id][1];
+
+    type1_strength += sim.add_dist(sim.rng);
+    type2_strength += sim.add_dist(sim.rng);
+
+    type1_strength *= sim.multiply_dist(sim.rng);
+    type2_strength *= sim.multiply_dist(sim.rng);
+
+    if(state == state::searching) {
+        type1_strength *= -sim.type1_avoidance;
+    } else if(state == state::returning) {
+        type2_strength *= -sim.type2_avoidance;
+    }
+
+    return type1_strength + type2_strength;
+\end{verbatim}
+
+There are four variables that allow customizing pathfinding behavior.
+
+add\_dist and multiply\_dist are random distributions, controlling the random addition and random multiplication.
+
+type1\_avoidance and type2\_avoidance control how strongly backtracking is avoided when searching for food and when returning to the nest, respectively.
+
+
+\subsection{Simulation configuration variables}
+
+The simulation has a number of variables to control its behavior.  These can be set at startup via command line arguments or at runtime via the simulation control window.
+
+List of configuration variables:
+
+\begin{itemize}
+    \item Seed: A 64-bit seed for the pseudorandom number generator.  Defaults to a random value.
+    \item Rows, columns: The dimensions of the simulated world.  Both default to 100
+    \item Nest count.  Defaults to 2
+    \item Ants per nest(including the queen).  Defaults to 10
+    \item Hunger increase per tick.  Defaults to 1
+    \item Hunger to die: ants will die when they reach this hunger level.  Defaults to 100
+    \item Food taken: the amount of food ants take from food sources.  Defaults to 50
+    \item Food resupply rate: How much food sources regenerate per tick.  Defaults to 5
+    \item Max food supply: Maximum food a tile can hold.  Defaults to 500
+    \item Food per new ant: Food consumed by the queen upon reproduction.  Defaults to 150
+    \item Food hunger ratio how much hunger each unit of food satisfies.  Defaults to 1
+    \item Pheromone falloff rate: Pheromone decrease per tick.  Defaults to 0.025
+    \item Pheromone increase rate: The amount of pheromones ants leave. Defaults to 6
+    \item type1\_avoidance and type2\_avoidance: Controls backtracking chance.  Both default to 1
+
+\end{itemize}
+
+When running the program, pass the arguments in the order described above.  Trailing arguments can be omitted and will take their default values.
+
+\section{Data Collection Overview}
+
+The simulation logs a number of event types.  The events are all logged as CSV, with the first field representing the event type.  Locations are represented as two fields, for the x and y coordinates.
+
+For example, if an ant with id 2 is born at nest 0, which is located at {57,12}, then the event will be logged as
+\begin{verbatim}
+    Birth,2,0,57,12
+\end{verbatim}
+
+Event types and their associated data points:
+\begin{itemize}
+    \item Seed: Emitted when the RNG is initialized.
+
+    Data: Seed for the RNG
+    \item Nest: Emitted when a nest is created.
+
+    Data: nest id, location
+    \item Move: Emitted when an ant moves.  Disabled by default.
+
+    Data: ant id, location, target tile weight
+    \item Birth: Emitted when an ant is born.
+
+    Data: ant id, nest id, location
+    \item Death: Emitted when an ant dies.
+
+    Data: the ant id, nest id, location
+    \item StateChange: Emitted when an ant changes state.
+
+    Data: new state, ant id, nest id, location, food transferred
+    \item Tick: Emitted prior to every tick.
+
+    Data: tick count, total ants, total food
+\end{itemize}
+
+\section{Execution Documentation}
+
+All runs used the seed value 12345678.
+All settings are set to their default values unless otherwise noted.
+All runs lasted for approximately 2 minutes(1200 ticks at the default speed) unless otherwise noted.
+
+Description of runs(see docs/milestone3/results/*.csv for the raw data):
+\begin{enumerate}
+    \item Default settings
+    \item 100 ants per nest
+    \item 2 ants per nest
+    \item 2 ants per nest, food taken set to 5
+    \item 2 ants per nest, food taken set to 500
+    \item 1000 by 1000 world, 10 nests, 2 ants per nest
+    \item 1000 by 1000 world, 20 nests, 2 ants per nest
+    \item 1000 by 1000 world, 20 nests, 50 ants per nest
+    \item 1000 by 1000 world, 20 nests, 50 ants per nest, food taken set to 500
+    \item 1000 by 1000 world, 20 nests, 50 ants per nest, food taken set to 1500
+\end{enumerate}
+
+\section{Preliminary Results}
+
+All of the test runs failed to show the cyclic population change I anticipated.  Instead, they all seemed to reach a stable value and stay there.  The food supply was barely affected, as the ants were not effectively utilizing food that was not very close to their nest.
+
+\includegraphics[width=0.9\textwidth]{graph1.png}
+\includegraphics[width=0.9\textwidth]{graph2.png}
+\includegraphics[width=0.9\textwidth]{graph3.png}
+
+
+\section{Conclusion}
+
+In the last deliverable, I mentioned that I was having trouble getting the pathfinding to work correctly.  That situation has improved due to better choices of the parameters(I believe that the randomization was too high previously, causing a tendency to wander and get lost).
+
+The functionality added in this milestone introduced a number of new parameters, however, and now I am having trouble finding good values for them.
+As a result, while the planned functionality is implemented, I am having trouble getting the results I expected in most cases.  In particular, I am having trouble finding values that produce the expected cyclic changes in the population.  The ants will either quickly die out completely, or the population remain stable at a low value, far lower than the food supply can support.  I believe that this is due to the ants failing to utilize food sources farther from their nest.
+
+While the cyclic population changes were not observed, I noticed several trends regarding the parameters and the values the population stabilized at.
+
+The stable population increases with the amount of food carried by the ants.  It also increases with the number of nests.  While each nest has a limited capacity to support ants, multiple nests are largely independent.
+
+The starting population does not have a significant effect.  A large starting population will quickly decrease and stabilize.  A small starting population usually increases to the same value, but nests will occasionally get unlucky and die out before that happens.
+
+\end{document}
