@@ -100,7 +100,7 @@ world::world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t n
 }
 
 void world::update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id) {
-    for(auto i = 0uz; i < pheromone_type_count; i++) {
+    for(auto i = 0uz; i < tile::pheromone_type_count; i++) {
         auto& strength = pheromone_trails.pheromone_strength[nest_id][i];
         auto& last_updated = pheromone_trails.last_updated[nest_id][i];
 

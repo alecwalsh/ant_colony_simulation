@@ -102,7 +102,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
             sf::Color color{};
 
             // Make sure pheromone values are up to date before drawing
-            for(nest_id_t i = 0uz; i < pheromone_type_count; i++) {
+            for(nest_id_t i = 0uz; i < tile::pheromone_type_count; i++) {
                 world::update_pheromones(tile.pheromones, world->sim->get_tick_count(), i);
             }
 

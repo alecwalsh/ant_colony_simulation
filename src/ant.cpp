@@ -89,7 +89,7 @@ void ant::move(world& world, point<> new_location) {
         current_tile.has_ant = false;
     }
 
-    for(auto i = 0uz; i < pheromone_type_count; i++) {
+    for(auto i = 0uz; i < tile::pheromone_type_count; i++) {
         assert(new_tile.pheromones.last_updated[nest_id][i] == world.sim->get_tick_count());
     }
     // Apply pheromone trails

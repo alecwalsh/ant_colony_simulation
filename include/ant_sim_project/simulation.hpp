@@ -9,8 +9,6 @@
 
 namespace ant_sim {
 
-constexpr std::size_t pheromone_type_count = tile::pheromone_type_count;
-
 // TODO: move these constants somewhere else
 // TODO: Allow adjusting these values at runtime
 // TODO: Support separate values for each pheromone type
