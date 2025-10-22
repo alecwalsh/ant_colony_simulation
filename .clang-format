@@ -8,3 +8,4 @@ AllowShortIfStatementsOnASingleLine: WithoutElse
 AlwaysBreakTemplateDeclarations: Yes
 NamespaceIndentation: Inner
 InsertNewlineAtEOF: true
+RequiresClausePosition: OwnLineWithBrace

@@ -8,8 +8,10 @@
 template <typename T, typename Mutex = std::mutex>
 class mutex_guard {
     T* pointer;
+
     std::unique_lock<Mutex> lock;
-public:
+
+  public:
     mutex_guard(T* pointer, Mutex& mutex) : pointer{pointer}, lock{mutex} {}
 
     T* operator->() const noexcept {
@@ -29,4 +31,20 @@ public:
             lock.unlock();
         }
     }
+};
+
+template <typename T, typename Mutex = std::mutex>
+class mutex_with_data {
+    T t;
+
+    // Allow locking a const mutex_with_data
+    mutable Mutex mutex;
+
+  public:
+    mutex_with_data() noexcept(std::is_nothrow_default_constructible_v<T>)
+        requires std::is_default_constructible_v<T>
+    = default;
+    explicit mutex_with_data(T t) noexcept(std::is_nothrow_move_constructible_v<T>) : t{std::move(t)} {}
+
+    [[nodiscard]] auto lock(this auto&& self) { return mutex_guard{&self.t, self.mutex}; }
 };
