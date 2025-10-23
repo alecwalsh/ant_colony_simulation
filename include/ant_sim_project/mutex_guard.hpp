@@ -45,6 +45,11 @@ class mutex_with_data {
         requires std::is_default_constructible_v<T>
     = default;
     explicit mutex_with_data(T t) noexcept(std::is_nothrow_move_constructible_v<T>) : t{std::move(t)} {}
+    explicit mutex_with_data(std::in_place_t, auto&&... args) : t(std::forward<decltype(args)>(args)...) {}
 
     [[nodiscard]] auto lock(this auto&& self) { return mutex_guard{&self.t, self.mutex}; }
+
+    // Returns a reference to the protected data, without locking
+    // Use with care
+    [[nodiscard]] auto& get_unsafe(this auto&& self) { return self.t; }
 };
