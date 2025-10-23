@@ -39,16 +39,20 @@ class simulation {
     float falloff_rate = 0.025f;
 
     // How much a pheromone's strength increases when left by an ant
-    pheromone_strength_t increase_rate = 3;
+    pheromone_strength_t increase_rate = 3 * 4;
 
-    // A value in this range is added to pheromone strength when calculating weights
-    std::pair<float, float> add_random_range = {-0.1f, 0.1f};
-    // Pheromone strength is multiplied by a value in this range when calculating weights
-    std::pair<float, float> mul_random_range = {0.5f, 1.5f};
+    // These variables control how strongly ants avoid backtracking
+    float type1_avoidance = 1.0f; // How strongly ants avoid type 1 pheromones when searching for food
+    float type2_avoidance = 1.0f; // How strongly ants avoid type 2 pheromones when returning to their nest with food
 
-    std::chrono::duration<float, std::milli> sleep_time{100};
+    // A value from this distribution is added to pheromone strength when calculating weights
+    std::uniform_real_distribution<float> add_dist{-0.1f, 0.1f};
+    // Pheromone strength is multiplied by a value from this distribution when calculating weights
+    std::uniform_real_distribution<float> multiply_dist{0.5f, 1.5f};
 
     std::minstd_rand rng;
+
+    std::chrono::duration<float, std::milli> sleep_time{100};
 
   private:
     std::size_t rows;

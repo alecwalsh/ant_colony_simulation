@@ -169,21 +169,16 @@ float ant::calculate_tile_weight(const tile& tile, simulation& sim) const noexce
     float type2_strength = tile.pheromones.pheromone_strength[nest_id][1];
 
     // Apply some randomization to the pheromone strengths
-    std::uniform_real_distribution dist1{sim.add_random_range.first, sim.add_random_range.second};
-    std::uniform_real_distribution dist2{sim.mul_random_range.first, sim.mul_random_range.second};
+    type1_strength += sim.add_dist(sim.rng);
+    type2_strength += sim.add_dist(sim.rng);
 
-    type1_strength += dist1(sim.rng);
-    type2_strength += dist1(sim.rng);
-
-    type1_strength *= dist2(sim.rng);
-    type2_strength *= dist2(sim.rng);
+    type1_strength *= sim.multiply_dist(sim.rng);
+    type2_strength *= sim.multiply_dist(sim.rng);
 
     if(state == state::searching) {
-        type1_strength *= -0.5f;
-        // type2_strength *= 1;
+        type1_strength *= -sim.type1_avoidance;
     } else if(state == state::returning) {
-        // type1_strength *= 1;
-        type2_strength *= -0.5f;
+        type2_strength *= -sim.type2_avoidance;
     }
 
     return type1_strength + type2_strength;
