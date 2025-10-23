@@ -17,8 +17,8 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
     for(nest_id_t i = 0; i < nest_count; i++) {
         auto& nest = nests.emplace_back(i);
 
-        auto x = location_dist_x(rand);
-        auto y = location_dist_y(rand);
+        auto x = location_dist_x(sim->rng);
+        auto y = location_dist_y(sim->rng);
 
         tiles[y, x].has_nest = true;
         tiles[y, x].nest_id = i;
@@ -59,39 +59,20 @@ void world::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
 
     for(auto y = 0uz; y < tiles.extent(0); y++) {
         for(auto x = 0uz; x < tiles.extent(1); x++) {
-            if(food_dist(rand) < 0.01f) {
+            if(food_dist(sim->rng) < 0.01f) {
                 tiles[y, x].food_supply = 255;
             }
         }
     }
 }
 
-world::world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count_per_nest,
-             std::optional<std::uint64_t> seed)
+world::world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count_per_nest)
     : rows{rows}, columns{columns}, tiles(rows * columns), sim{sim} {
     if(nest_count > tile::max_nests) {
         auto error_string =
             std::format("Error: {} nests is greater than the maximum of {}", nest_count, tile::max_nests);
         throw std::runtime_error{error_string};
     }
-
-    std::uint32_t seed_parts[2];
-
-    if(seed) {
-        // std::seed_seq only uses the low 32 bits of each input, so break the seed into 2 32 bit values
-        seed_parts[0] = *seed >> 32;
-        seed_parts[1] = *seed & 0xFFFFFFFF;
-    } else {
-        std::random_device random_device;
-
-        seed_parts[0] = random_device();
-        seed_parts[1] = random_device();
-    }
-
-    std::seed_seq seed_seq{seed_parts[0], seed_parts[1]};
-    rand.seed(seed_seq);
-
-    std::println("Using seed {}", static_cast<std::uint64_t>(seed_parts[0]) << 32 | seed_parts[1]);
 
     nests.reserve(nest_count);
     ants.reserve(ant_count_per_nest);

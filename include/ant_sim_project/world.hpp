@@ -28,15 +28,11 @@ class world {
     std::unordered_map<ant_id_t, ant> ants;
     std::vector<nest> nests;
 
-    void generate(nest_id_t nest_count, ant_id_t ant_count);
-
   public:
-    std::default_random_engine rand;
-
     // TODO: Merge simulation and world classes
     simulation* sim;
 
-    world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count_per_nest, std::optional<std::uint64_t> seed = {});
+    world(std::size_t rows, std::size_t columns, simulation* sim, nest_id_t nest_count, ant_id_t ant_count_per_nest);
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
@@ -51,6 +47,8 @@ class world {
 
     // Updates the strength of the pheromone trails to account for fading over time
     static void update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id);
+
+    void generate(nest_id_t nest_count, ant_id_t ant_count);
 };
 
 } // namespace ant_sim

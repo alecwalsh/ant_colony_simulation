@@ -173,11 +173,11 @@ float ant::calculate_tile_weight(const tile& tile, world& world) noexcept {
     std::uniform_real_distribution dist1{add_random_range.first, add_random_range.second};
     std::uniform_real_distribution dist2{mul_random_range.first, mul_random_range.second};
 
-    type1_strength += dist1(world.rand);
-    type2_strength += dist1(world.rand);
+    type1_strength += dist1(world.sim->rng);
+    type2_strength += dist1(world.sim->rng);
 
-    type1_strength *= dist2(world.rand);
-    type2_strength *= dist2(world.rand);
+    type1_strength *= dist2(world.sim->rng);
+    type2_strength *= dist2(world.sim->rng);
 
     if(state == state::searching) {
         type1_strength *= -0.5f;

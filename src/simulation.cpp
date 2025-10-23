@@ -7,9 +7,31 @@
 
 namespace ant_sim {
 
+std::minstd_rand get_rng(std::optional<std::uint64_t> seed) {
+    std::uint32_t seed_parts[2];
+
+    if(seed) {
+        // std::seed_seq only uses the low 32 bits of each input, so break the seed into 2 32 bit values
+        seed_parts[0] = *seed >> 32;
+        seed_parts[1] = *seed & 0xFFFFFFFF;
+    } else {
+        std::random_device random_device;
+
+        seed_parts[0] = random_device();
+        seed_parts[1] = random_device();
+    }
+
+    std::seed_seq seed_seq{seed_parts[0], seed_parts[1]};
+
+    std::println("Using seed {}", static_cast<std::uint64_t>(seed_parts[0]) << 32 | seed_parts[1]);
+
+    return std::minstd_rand{seed_seq};
+}
+
 simulation::simulation(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count_per_nest,
                        std::optional<std::uint64_t> seed)
-    : sim_world{rows, columns, this, nest_count, ant_count_per_nest, seed} {}
+    : rng{get_rng(seed)}, sim_world{rows, columns, this, nest_count, ant_count_per_nest} {
+}
 
 void simulation::tick() {
     if(paused()) return;
