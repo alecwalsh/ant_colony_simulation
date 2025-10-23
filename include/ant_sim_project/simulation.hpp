@@ -18,21 +18,7 @@ namespace ant_sim {
 
 namespace stdex = std::experimental;
 
-
-// TODO: move these constants somewhere else
-// TODO: Allow adjusting these values at runtime
 // TODO: Support separate values for each pheromone type
-
-// How much a pheromone's strength decreases each tick
-constexpr float falloff_rate = 0.025f;
-
-// How much a pheromone's strength increases when left by an ant
-constexpr pheromone_strength_t increase_rate = 3;
-
-// A value in this range is added to pheromone strength when calculating weights
-constexpr std::pair add_random_range = {-0.1f, 0.1f};
-// Pheromone strength is multiplied by a value in this range when calculating weights
-constexpr std::pair mul_random_range = {0.5f, 1.5f};
 
 class simulation {
   public:
@@ -45,15 +31,26 @@ class simulation {
 
     float hunger_increase_per_tick = 1.0f;
     float hunger_to_die = 100.0f;
-    food_supply_t food_taken = 5; // The amount of food ants take when they encounter a food source
+    food_supply_t food_taken = 5;         // The amount of food ants take when they encounter a food source
     food_supply_t food_per_new_ant = 150; // Food needed for a queen to produce a new ant
     float food_hunger_ratio = 1.0f;
+
+    // How much a pheromone's strength decreases each tick
+    float falloff_rate = 0.025f;
+
+    // How much a pheromone's strength increases when left by an ant
+    pheromone_strength_t increase_rate = 3;
+
+    // A value in this range is added to pheromone strength when calculating weights
+    std::pair<float, float> add_random_range = {-0.1f, 0.1f};
+    // Pheromone strength is multiplied by a value in this range when calculating weights
+    std::pair<float, float> mul_random_range = {0.5f, 1.5f};
 
     std::chrono::duration<float, std::milli> sleep_time{100};
 
     std::minstd_rand rng;
 
-private:
+  private:
     std::size_t rows;
     std::size_t columns;
 
@@ -61,7 +58,7 @@ private:
 
     std::unordered_map<ant_id_t, ant> ants;
     std::vector<nest> nests;
-    
+
     // All members of this struct must always be accessed via std::atomic_ref, as multiple threads may access them.
     // Each member is independent of the others.  There is no need to pass the entire struct to std::atomic_ref.
     struct {
@@ -122,7 +119,7 @@ private:
     [[nodiscard]] auto get_nests(this auto&& self) noexcept { return std::span{self.nests}; }
 
     // Updates the strength of the pheromone trails to account for fading over time
-    static void update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id);
+    void update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id);
 
     void generate(nest_id_t nest_count, ant_id_t ant_count);
 

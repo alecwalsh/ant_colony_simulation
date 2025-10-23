@@ -92,7 +92,7 @@ void ant::move(simulation& sim, point<> new_location) {
         assert(new_tile.pheromones.last_updated[nest_id][i] == sim.get_tick_count());
     }
     // Apply pheromone trails
-    current_tile.pheromones.pheromone_strength[nest_id][std::to_underlying(state)] += increase_rate;
+    current_tile.pheromones.pheromone_strength[nest_id][std::to_underlying(state)] += sim.increase_rate;
 
     // Add some food to the inventory, then set state to returning to nest
     if(new_tile.food_supply != 0) {
@@ -169,8 +169,8 @@ float ant::calculate_tile_weight(const tile& tile, simulation& sim) const noexce
     float type2_strength = tile.pheromones.pheromone_strength[nest_id][1];
 
     // Apply some randomization to the pheromone strengths
-    std::uniform_real_distribution dist1{add_random_range.first, add_random_range.second};
-    std::uniform_real_distribution dist2{mul_random_range.first, mul_random_range.second};
+    std::uniform_real_distribution dist1{sim.add_random_range.first, sim.add_random_range.second};
+    std::uniform_real_distribution dist2{sim.mul_random_range.first, sim.mul_random_range.second};
 
     type1_strength += dist1(sim.rng);
     type2_strength += dist1(sim.rng);
@@ -216,7 +216,7 @@ std::optional<point<>> ant::calculate_next_location(simulation& sim) {
         // Ignore tiles that are already full
         if(tile.is_full()) continue;
 
-        simulation::update_pheromones(tile.pheromones, current_tick, nest_id);
+        sim.update_pheromones(tile.pheromones, current_tick, nest_id);
 
         float weight = calculate_tile_weight(tile, sim);
 
