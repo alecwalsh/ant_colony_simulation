@@ -38,7 +38,7 @@ void gui::draw_gui(sf::Time delta_time) {
     ImGui::Text("Currently displaying pheromones from nest %u", world_drawable->visible_pheromone_nest_id);
 
     // TODO: Allow retrieving number of nests without locking sim
-    auto nest_count = static_cast<nest_id_t>(sim->lock()->world.get_nests().size());
+    auto nest_count = static_cast<nest_id_t>(sim->lock()->get_nests().size());
 
     int i = world_drawable->visible_pheromone_nest_id;
     ImGui::SliderInt("Change visible pheromone nest", &i, 0, nest_count - 1);

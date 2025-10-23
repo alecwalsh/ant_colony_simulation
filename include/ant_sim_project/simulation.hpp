@@ -3,12 +3,21 @@
 #include <cstddef>
 #include <mutex>
 #include <atomic>
+#include <random>
+#include <unordered_map>
 
-#include "world.hpp"
+#include "tile.hpp"
+#include "ant.hpp"
+#include "nest.hpp"
 #include "types.hpp"
 #include "mutex_guard.hpp"
 
+#include <experimental/mdspan>
+
 namespace ant_sim {
+
+namespace stdex = std::experimental;
+
 
 // TODO: move these constants somewhere else
 // TODO: Allow adjusting these values at runtime
@@ -39,6 +48,14 @@ class simulation {
 
     std::minstd_rand rng;
 
+    std::size_t rows;
+    std::size_t columns;
+
+    std::vector<tile> tiles;
+
+    std::unordered_map<ant_id_t, ant> ants;
+    std::vector<nest> nests;
+
   private:
     // All members of this struct must always be accessed via std::atomic_ref, as multiple threads may access them.
     // Each member is independent of the others.  There is no need to pass the entire struct to std::atomic_ref.
@@ -55,8 +72,6 @@ class simulation {
     } atomically_accessed;
 
   public:
-    world world;
-
     simulation(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count_per_nest,
                std::optional<std::uint64_t> seed = {});
 
@@ -83,6 +98,22 @@ class simulation {
     void set_log_ant_state_changes(bool log_ant_state_changes) noexcept;
 
     [[nodiscard]] tick_t get_tick_count() const noexcept;
+
+    // Returns a rows x columns std::mdspan referring to tiles
+    [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
+        return stdex::mdspan{self.tiles.data(), self.rows, self.columns};
+    }
+
+    // Returns a reference to ants
+    [[nodiscard]] auto& get_ants(this auto&& self) noexcept { return self.ants; }
+
+    // Returns a std::span referring to nests
+    [[nodiscard]] auto get_nests(this auto&& self) noexcept { return std::span{self.nests}; }
+
+    // Updates the strength of the pheromone trails to account for fading over time
+    static void update_pheromones(tile::pheromone_trails& pheromone_trails, tick_t current_tick, nest_id_t nest_id);
+
+    void generate(nest_id_t nest_count, ant_id_t ant_count);
 
     void tick();
 };

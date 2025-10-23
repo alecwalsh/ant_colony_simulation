@@ -18,7 +18,7 @@ class world_drawable : public sf::Drawable {
 
     sf::Font font;
 
-    void draw_text(sf::RenderTarget& target, const sf::RenderStates& states, const world& world) const;
+    void draw_text(sf::RenderTarget& target, const sf::RenderStates& states, simulation& locked_sim) const;
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 

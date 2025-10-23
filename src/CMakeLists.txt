@@ -1,6 +1,5 @@
 add_library(ant_sim_project
         simulation.cpp ../include/ant_sim_project/simulation.hpp
-        world.cpp ../include/ant_sim_project/world.hpp
         ant.cpp ../include/ant_sim_project/ant.hpp
         ../include/ant_sim_project/nest.hpp
         ../include/ant_sim_project/tile.hpp

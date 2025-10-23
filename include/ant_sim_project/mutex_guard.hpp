@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <utility>
 #include <cassert>
 
 // Wraps a pointer to an object and a unique_lock protecting that object

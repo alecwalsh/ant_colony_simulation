@@ -31,7 +31,7 @@ static std::pair<point<>, point<>> get_visible_area(const sf::View& view,
     return {{left_clamped, top_clamped}, {right_clamped, bottom_clamped}};
 }
 
-void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates& states, const world& world) const {
+void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates& states, simulation& locked_sim) const {
     sf::Text text{font};
 
     auto [x, y] = sim->get_mouse_location();
@@ -44,7 +44,7 @@ void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates&
     auto tile_x = static_cast<std::size_t>(x / tile_size);
     auto tile_y = static_cast<std::size_t>(y / tile_size);
 
-    auto tiles = world.get_tiles();
+    auto tiles = locked_sim.get_tiles();
 
     if(tile_x >= tiles.extent(1) || tile_y >= tiles.extent(0)) {
         // Tile is out of bounds, and therefore has no associated information to display
@@ -56,9 +56,9 @@ void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates&
     std::string tile_description;
 
     if(tile.has_nest) {
-        tile_description = std::format("Nest {} with {} food", tile.nest_id, world.get_nests()[tile.nest_id].food_supply);
+        tile_description = std::format("Nest {} with {} food", tile.nest_id, locked_sim.get_nests()[tile.nest_id].food_supply);
     } else if(tile.has_ant) {
-        tile_description = std::format("Ant {} from nest {}", tile.ant_id, world.get_ants().at(tile.ant_id).nest_id);
+        tile_description = std::format("Ant {} from nest {}", tile.ant_id, locked_sim.get_ants().at(tile.ant_id).nest_id);
     } else if(tile.food_supply > 0) {
         tile_description = std::format("Food supply: {}", tile.food_supply);
     } else {
@@ -88,9 +88,8 @@ void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates&
 
 void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     auto locked_sim = sim->lock();
-    auto world = locked_sim->world;
 
-    auto tiles = world.get_tiles();
+    auto tiles = locked_sim->get_tiles();
 
     auto [top_left, bottom_right] = get_visible_area(target.getView(), tiles, tile_size);
 
@@ -104,7 +103,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
             // Make sure pheromone values are up to date before drawing
             for(nest_id_t i = 0uz; i < tile::pheromone_type_count; i++) {
-                world::update_pheromones(tile.pheromones, world.sim->get_tick_count(), i);
+                simulation::update_pheromones(tile.pheromones, sim->get_tick_count(), i);
             }
 
             if(tile.has_nest) {
@@ -128,7 +127,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
         }
     }
 
-    draw_text(target, states, world);
+    draw_text(target, states, *locked_sim);
 }
 
 

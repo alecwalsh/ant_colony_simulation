@@ -7,12 +7,12 @@
 namespace ant_sim {
 
 struct tile;
-class world;
+class simulation;
 
 class ant {
-    std::optional<point<>> calculate_next_location(world& world);
+    std::optional<point<>> calculate_next_location(simulation& world);
 
-    float calculate_tile_weight(const tile& tile, world& world) noexcept;
+    float calculate_tile_weight(const tile& tile, simulation& world) noexcept;
 
   public:
     nest_id_t nest_id;
@@ -27,8 +27,8 @@ class ant {
     float hunger;
     food_supply_t food_in_inventory;
 
-    void tick(world& world);
-    void move(world& world, point<> new_location);
+    void tick(simulation& sim);
+    void move(simulation& sim, point<> new_location);
 };
 
 } // namespace ant_sim
