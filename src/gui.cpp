@@ -50,6 +50,16 @@ void gui::draw_gui(sf::Time delta_time) const {
     ImGui::SliderInt("Visible pheromone nest", &i, 0, nest_count - 1);
     world_drawable->visible_pheromone_nest_id = static_cast<nest_id_t>(i);
 
+    ImGui::SliderFloat("Hunger increase per tick", &locked_sim->hunger_increase_per_tick, 0, 100);
+    ImGui::SliderFloat("Hunger to die", &locked_sim->hunger_to_die, 0, 1000);
+    ImGui::SliderFloat("Food taken by ants", &locked_sim->food_taken, 0, 1000);
+    ImGui::SliderFloat("Food resupply rate", &locked_sim->food_resupply_rate, 0, 100);
+    ImGui::SliderFloat("Max food supply", &locked_sim->max_food_supply, 0, 10000);
+    ImGui::SliderFloat("Food per new ant", &locked_sim->food_per_new_ant, 0, 10000);
+    ImGui::SliderFloat("Food hunger ratio", &locked_sim->food_hunger_ratio, 0, 100);
+    ImGui::SliderFloat("Pheromone falloff rate", &locked_sim->falloff_rate, 0, 2);
+    ImGui::SliderFloat("Pheromone increase rate", &locked_sim->increase_rate, 0, 100);
+
     ImGui::End();
 
     ImGui::Begin("Simulation stats");

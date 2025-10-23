@@ -35,6 +35,8 @@ get_visible_area(const sf::View& view, stdex::mdspan<tile, stdex::dextents<std::
 void world_drawable::draw_info(simulation& locked_sim) const {
     auto [x, y] = sim->get_mouse_location();
 
+    ImGui::Begin("Current tile info");
+
     if(x < 0 || y < 0) {
         // Tile is out of bounds, and therefore has no associated information to display
         return;
@@ -47,12 +49,12 @@ void world_drawable::draw_info(simulation& locked_sim) const {
 
     if(tile_x >= tiles.extent(1) || tile_y >= tiles.extent(0)) {
         // Tile is out of bounds, and therefore has no associated information to display
+        ImGui::End();
         return;
     }
 
     const auto& tile = tiles[tile_y, tile_x];
 
-    ImGui::Begin("Current tile info");
     ImGui::Text("%s", std::format("{}, {}", tile_y, tile_x).c_str());
 
     if(tile.has_nest) {
@@ -63,6 +65,7 @@ void world_drawable::draw_info(simulation& locked_sim) const {
         auto& ant = locked_sim.get_ants().at(tile.ant_id);
         auto tile_description = std::format("Ant {} from nest {}", ant.ant_id, ant.nest_id);
         ImGui::Text("%s", std::format("{}", tile_description).c_str());
+        ImGui::Text("State: %s", ant.state == ant::state::searching ? "Searching" : "Returning");
         ImGui::Text("%s", std::format("Hunger: {}", ant.hunger).c_str());
     }
 
@@ -101,7 +104,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
             } else if(tile.has_ant) {
                 color = {255, 255, 255};
             } else if(tile.food_supply > 0) {
-                color = {0, static_cast<std::uint8_t>(tile.food_supply), 0};
+                color = {0, static_cast<std::uint8_t>(255 * tile.food_supply / locked_sim->max_food_supply), 0};
             } else {
                 auto red = tile.pheromones.pheromone_strength[visible_pheromone_nest_id][visible_pheromone_type];
 
