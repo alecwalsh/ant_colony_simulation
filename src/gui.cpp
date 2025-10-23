@@ -29,7 +29,7 @@ void gui::draw_gui(sf::Time delta_time) {
     // Begin a new ImGui frame
     ImGui::SFML::Update(*window, delta_time);
 
-    ImGui::Begin("Simulation visualization control");
+    ImGui::Begin("Simulation control");
 
     if(ImGui::Button("Toggle visible pheromone type")) {
         world_drawable->visible_pheromone_type = world_drawable->visible_pheromone_type == 0 ? 1 : 0;
@@ -38,6 +38,11 @@ void gui::draw_gui(sf::Time delta_time) {
     ImGui::Text("Currently displaying pheromones from nest %u", world_drawable->visible_pheromone_nest_id);
 
     auto locked_sim = sim->lock();
+
+    // Get speed in updates per second, then allow setting it with a slider
+    float speed = 1 / std::chrono::duration<float>{locked_sim->sleep_time}.count();
+    ImGui::SliderFloat("Updates per second", &speed, 0, 100);
+    locked_sim->sleep_time = std::chrono::duration<float>{1 / speed};
 
     auto nest_count = static_cast<nest_id_t>(locked_sim->get_nests().size());
 

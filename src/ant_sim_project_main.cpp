@@ -34,10 +34,15 @@ int main(int argc, char* argv[]) {
 
     std::jthread simulation_thread{[](const std::stop_token& stop_token, ant_sim::simulation_mutex& sim) {
         while(!sim.stopped() && !stop_token.stop_requested()) {
-            sim.lock()->tick();
+            auto locked_sim = sim.lock();
 
-            // TODO: adjust sleep time based on desired simulation framerate
-            std::this_thread::sleep_for(std::chrono::milliseconds{100});
+            locked_sim->tick();
+
+            auto sleep_time = locked_sim->sleep_time;
+
+            locked_sim.unlock();
+
+            std::this_thread::sleep_for(sleep_time);
         }
     }, std::ref(sim)};
 

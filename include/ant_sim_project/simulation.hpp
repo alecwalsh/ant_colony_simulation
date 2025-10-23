@@ -47,6 +47,8 @@ class simulation {
     std::uint8_t food_taken = 5; // The amount of food ants take when they encounter a food source
     food_supply_t food_per_new_ant = 150;
 
+    std::chrono::duration<float, std::milli> sleep_time{100};
+
     std::minstd_rand rng;
 
 private:
