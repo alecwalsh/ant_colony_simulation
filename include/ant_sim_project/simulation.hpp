@@ -29,9 +29,13 @@ class simulation {
         paused       // The simulation is paused
     };
 
+    float food_chance = 0.01f; // Chance that any given tile has food
+
     float hunger_increase_per_tick = 1.0f;
     float hunger_to_die = 100.0f;
     food_supply_t food_taken = 5;         // The amount of food ants take when they encounter a food source
+    food_supply_t food_resupply_rate = 5; // The amount of food each food source regenerates per tick
+    food_supply_t max_food_supply = 500;
     food_supply_t food_per_new_ant = 150; // Food needed for a queen to produce a new ant
     float food_hunger_ratio = 1.0f;
 
@@ -63,6 +67,8 @@ class simulation {
     std::unordered_map<ant_id_t, ant> ants;
     std::vector<nest> nests;
 
+    std::vector<point<>> food_sources;
+
     // All members of this struct must always be accessed via std::atomic_ref, as multiple threads may access them.
     // Each member is independent of the others.  There is no need to pass the entire struct to std::atomic_ref.
     struct {
@@ -73,7 +79,7 @@ class simulation {
         // Ensure mouse_location is sufficiently aligned to use with std::atomic_ref
         alignas(std::atomic_ref<point_t>::required_alignment) point_t mouse_location = {0, 0};
 
-        std::uint64_t food_count = 0;
+        float food_count = 0;
 
         bool log_ant_movements = false;
         bool log_ant_state_changes = true;
@@ -113,8 +119,8 @@ class simulation {
 
     [[nodiscard]] tick_t get_tick_count() const noexcept;
 
-    [[nodiscard]] std::uint64_t get_food_count() const noexcept;
-    void set_food_count(std::uint64_t food_count) noexcept;
+    [[nodiscard]] float get_food_count() const noexcept;
+    void set_food_count(float food_count) noexcept;
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {

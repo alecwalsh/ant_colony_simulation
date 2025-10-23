@@ -116,7 +116,8 @@ void simulation::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
 
     for(auto y = 0uz; y < tiles.extent(0); y++) {
         for(auto x = 0uz; x < tiles.extent(1); x++) {
-            if(food_dist(rng) < 0.01f) {
+            if(food_dist(rng) < food_chance) {
+                food_sources.push_back({x, y});
                 tiles[y, x].food_supply = 255;
                 set_food_count(get_food_count() + tiles[y, x].food_supply);
             }
@@ -168,6 +169,17 @@ void simulation::tick() {
     }
 
     new_ants.clear();
+
+    for(auto [x, y] : food_sources) {
+        auto old_food_supply = get_tiles()[y, x].food_supply;
+        auto current_food_supply = get_tiles()[y, x].food_supply + food_resupply_rate;
+
+        get_tiles()[y, x].food_supply = std::min(current_food_supply, max_food_supply);
+
+        auto food_diff = get_tiles()[y, x].food_supply - old_food_supply;
+
+        set_food_count(get_food_count() + food_diff);
+    }
 
     ++std::atomic_ref{atomically_accessed.tick_count};
 
@@ -223,11 +235,11 @@ void simulation::set_log_ant_state_changes(bool log_ant_state_changes) noexcept 
 
 tick_t simulation::get_tick_count() const noexcept { return atomic_read(atomically_accessed.tick_count); }
 
-[[nodiscard]] std::uint64_t simulation::get_food_count() const noexcept {
+[[nodiscard]] float simulation::get_food_count() const noexcept {
     return atomic_read(atomically_accessed.food_count);
 }
 
-void simulation::set_food_count(std::uint64_t food_count) noexcept {
+void simulation::set_food_count(float food_count) noexcept {
     std::atomic_ref{atomically_accessed.food_count} = food_count;
 }
 
