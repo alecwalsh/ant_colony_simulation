@@ -24,6 +24,8 @@ class ant {
 
     enum class state { searching, returning } state;
 
+    bool dead;
+
     float hunger;
     food_supply_t food_in_inventory;
 

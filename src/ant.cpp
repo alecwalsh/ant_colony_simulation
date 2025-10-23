@@ -261,6 +261,25 @@ void ant::tick(simulation& sim) {
     case caste::worker: {
         hunger += sim.hunger_increase_per_tick;
 
+        if(food_in_inventory != 0) {
+            auto food_needed = static_cast<food_supply_t>(hunger * sim.food_hunger_ratio);
+            auto food_eaten = std::min(food_in_inventory, food_needed);
+
+            food_in_inventory -= food_eaten;
+            hunger -= static_cast<float>(food_eaten) / sim.food_hunger_ratio;
+        }
+
+        if(hunger >= sim.hunger_to_die) {
+            // Mark ant as dead
+            // It will be removed once this method returns
+            assert((sim.get_tiles()[location.y, location.x].has_ant));
+
+            dead = true;
+            sim.get_tiles()[location.y, location.x].has_ant = false;
+
+            return;
+        }
+
         auto new_location = calculate_next_location(sim).value_or(location);
 
         move(sim, new_location);

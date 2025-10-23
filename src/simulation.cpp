@@ -145,8 +145,16 @@ void simulation::update_pheromones(tile::pheromone_trails& pheromone_trails, tic
 void simulation::tick() {
     if(paused()) return;
 
-    for(auto& ant : ants | std::views::values) {
+    for(auto it = ants.begin(); it != ants.end();) {
+        auto& ant = it->second;
+
         ant.tick(*this);
+
+        if(ant.dead) {
+            it = ants.erase(it);
+        } else {
+            ++it;
+        }
     }
 
     for(auto& new_ant : new_ants) {

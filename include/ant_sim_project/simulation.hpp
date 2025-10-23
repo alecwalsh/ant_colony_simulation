@@ -44,8 +44,10 @@ class simulation {
     };
 
     float hunger_increase_per_tick = 1.0f;
-    std::uint8_t food_taken = 5; // The amount of food ants take when they encounter a food source
-    food_supply_t food_per_new_ant = 150;
+    float hunger_to_die = 100.0f;
+    food_supply_t food_taken = 5; // The amount of food ants take when they encounter a food source
+    food_supply_t food_per_new_ant = 150; // Food needed for a queen to produce a new ant
+    float food_hunger_ratio = 1.0f;
 
     std::chrono::duration<float, std::milli> sleep_time{100};
 
