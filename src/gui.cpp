@@ -21,11 +21,11 @@ gui::gui(sf::RenderWindow& window, simulation_mutex& sim, graphics::world_drawab
     imgui_initialized = true;
 }
 
-void gui::process_event(const sf::Event& event) {
+void gui::process_event(const sf::Event& event) const {
     ImGui::SFML::ProcessEvent(*window, event);
 }
 
-void gui::draw_gui(sf::Time delta_time) {
+void gui::draw_gui(sf::Time delta_time) const {
     // Begin a new ImGui frame
     ImGui::SFML::Update(*window, delta_time);
 
@@ -47,7 +47,7 @@ void gui::draw_gui(sf::Time delta_time) {
     auto nest_count = static_cast<nest_id_t>(locked_sim->get_nests().size());
 
     int i = world_drawable->visible_pheromone_nest_id;
-    ImGui::SliderInt("Change visible pheromone nest", &i, 0, nest_count - 1);
+    ImGui::SliderInt("Visible pheromone nest", &i, 0, nest_count - 1);
     world_drawable->visible_pheromone_nest_id = static_cast<nest_id_t>(i);
 
     ImGui::End();
@@ -58,7 +58,7 @@ void gui::draw_gui(sf::Time delta_time) {
     ImGui::End();
 }
 
-void gui::render() { ImGui::SFML::Render(*window); }
+void gui::render() const { ImGui::SFML::Render(*window); }
 
 gui::~gui() {
     ImGui::SFML::Shutdown(*window);

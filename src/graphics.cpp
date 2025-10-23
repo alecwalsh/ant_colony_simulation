@@ -2,13 +2,14 @@
 
 #include <format>
 
+#include "imgui.h"
+
 namespace ant_sim::graphics {
 
 // Returns the top left and bottom right tiles of the visible area
 // This does not account for rotated views
-static std::pair<point<>, point<>> get_visible_area(const sf::View& view,
-                                                stdex::mdspan<tile, stdex::dextents<std::size_t, 2>> tiles,
-                                                float tile_size) {
+static std::pair<point<>, point<>>
+get_visible_area(const sf::View& view, stdex::mdspan<tile, stdex::dextents<std::size_t, 2>> tiles, float tile_size) {
     auto [view_width, view_height] = view.getSize();
     auto [center_x, center_y] = view.getCenter();
 
@@ -31,9 +32,7 @@ static std::pair<point<>, point<>> get_visible_area(const sf::View& view,
     return {{left_clamped, top_clamped}, {right_clamped, bottom_clamped}};
 }
 
-void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates& states, simulation& locked_sim) const {
-    sf::Text text{font};
-
+void world_drawable::draw_info(simulation& locked_sim) const {
     auto [x, y] = sim->get_mouse_location();
 
     if(x < 0 || y < 0) {
@@ -53,37 +52,28 @@ void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates&
 
     const auto& tile = tiles[tile_y, tile_x];
 
-    std::string tile_description;
+    ImGui::Begin("Current tile info");
+    ImGui::Text("%s", std::format("{}, {}", tile_y, tile_x).c_str());
 
     if(tile.has_nest) {
-        tile_description = std::format("Nest {} with {} food", tile.nest_id, locked_sim.get_nests()[tile.nest_id].food_supply);
+        auto tile_description =
+            std::format("Nest {} with {} food", tile.nest_id, locked_sim.get_nests()[tile.nest_id].food_supply);
+        ImGui::Text("%s", tile_description.c_str());
     } else if(tile.has_ant) {
-        tile_description = std::format("Ant {} from nest {}", tile.ant_id, locked_sim.get_ants().at(tile.ant_id).nest_id);
-    } else if(tile.food_supply > 0) {
-        tile_description = std::format("Food supply: {}", tile.food_supply);
-    } else {
-        tile_description = std::format("Pheromones: {:.3f}", tile.pheromones.pheromone_strength[0][0]);
+        auto& ant = locked_sim.get_ants().at(tile.ant_id);
+        auto tile_description = std::format("Ant {} from nest {}", ant.ant_id, ant.nest_id);
+        ImGui::Text("%s", std::format("{}", tile_description).c_str());
+        ImGui::Text("%s", std::format("Hunger: {}", ant.hunger).c_str());
     }
 
-    text.setString(std::format("{}, {}\n{}", tile_y, tile_x, tile_description));
+    if(tile.food_supply > 0) {
+        ImGui::Text("%s", std::format("Food supply: {}", tile.food_supply).c_str());
+    } else {
+        auto pheromone_strength = tile.pheromones.pheromone_strength[visible_pheromone_nest_id][visible_pheromone_type];
+        ImGui::Text("%s", std::format("Pheromones: {:.3f}", pheromone_strength).c_str());
+    }
 
-    auto current_view = target.getView(); // Save the target's current view for restoring after rendering text
-
-    auto [size_x, size_y] = target.getSize();
-
-    auto text_view = sf::View{sf::FloatRect{{}, {static_cast<float>(size_x), static_cast<float>(size_y)}}};
-
-    target.setView(text_view);
-
-    auto [width, height] = text_view.getSize();
-
-    text.setPosition({width - 375, height - 100});
-    text.setCharacterSize(24 * 2);
-    text.setFillColor(sf::Color::Blue);
-
-    target.draw(text, states);
-
-    target.setView(current_view); // Restore previous view
+    ImGui::End();
 }
 
 void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -127,9 +117,8 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
         }
     }
 
-    draw_text(target, states, *locked_sim);
+    draw_info(*locked_sim);
 }
-
 
 void world_drawable::zoom_view(sf::View& view, bool zoom_in) noexcept {
     float multiplier = zoom_in ? 1 : -1;

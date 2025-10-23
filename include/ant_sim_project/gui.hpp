@@ -18,10 +18,10 @@ class gui {
   public:
     gui(sf::RenderWindow& window, simulation_mutex& sim, graphics::world_drawable& world_drawable);
 
-    void process_event(const sf::Event& event);
+    void process_event(const sf::Event& event) const;
 
-    void draw_gui(sf::Time delta_time);
-    void render();
+    void draw_gui(sf::Time delta_time) const;
+    void render() const;
 
     ~gui();
 };
