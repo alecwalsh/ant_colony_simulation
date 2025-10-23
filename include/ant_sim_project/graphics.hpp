@@ -6,7 +6,7 @@
 
 namespace ant_sim::graphics {
 class world_drawable : public sf::Drawable {
-    simulation* sim;
+    simulation_mutex* sim;
 
     float tile_size; // The tile size in pixels, prior to zoom being applied
     float gap_size = 1; // Size of the gap between tiles, prior to zoom being applied
@@ -26,9 +26,9 @@ class world_drawable : public sf::Drawable {
     std::size_t visible_pheromone_type = 0;
     nest_id_t visible_pheromone_nest_id = 0;
 
-    explicit world_drawable(simulation* sim, float tile_size = 10,
+    explicit world_drawable(simulation_mutex& sim, float tile_size = 10,
                             const std::filesystem::path& font_path = "../../../data/ProggyTiny.ttf") noexcept
-        : sim{sim}, tile_size{tile_size}, font{font_path} {}
+        : sim{&sim}, tile_size{tile_size}, font{font_path} {}
 
     // Increase or decrease current_zoom, and update the view's size to account for the change
     // Zoom is increased relative to a zoom of 1: zooming in by 20% twice is equivalent to a single 40% zoom, not 44%

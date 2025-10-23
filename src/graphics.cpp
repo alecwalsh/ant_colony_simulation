@@ -87,9 +87,10 @@ void world_drawable::draw_text(sf::RenderTarget& target, const sf::RenderStates&
 }
 
 void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-    auto world = sim->get_world();
+    auto locked_sim = sim->lock();
+    auto world = locked_sim->world;
 
-    auto tiles = world->get_tiles();
+    auto tiles = world.get_tiles();
 
     auto [top_left, bottom_right] = get_visible_area(target.getView(), tiles, tile_size);
 
@@ -103,7 +104,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
             // Make sure pheromone values are up to date before drawing
             for(nest_id_t i = 0uz; i < tile::pheromone_type_count; i++) {
-                world::update_pheromones(tile.pheromones, world->sim->get_tick_count(), i);
+                world::update_pheromones(tile.pheromones, world.sim->get_tick_count(), i);
             }
 
             if(tile.has_nest) {
@@ -127,7 +128,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
         }
     }
 
-    draw_text(target, states, *world);
+    draw_text(target, states, world);
 }
 
 

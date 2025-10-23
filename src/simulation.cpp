@@ -30,16 +30,13 @@ std::minstd_rand get_rng(std::optional<std::uint64_t> seed) {
 
 simulation::simulation(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count_per_nest,
                        std::optional<std::uint64_t> seed)
-    : rng{get_rng(seed)}, sim_world{rows, columns, this, nest_count, ant_count_per_nest} {
-}
+    : rng{get_rng(seed)}, world{rows, columns, this, nest_count, ant_count_per_nest} {}
 
 void simulation::tick() {
     if(paused()) return;
 
-    auto world = get_world();
-
-    for(auto& [ant_id, ant] : world->get_ants()) {
-        ant.tick(*world);
+    for(auto& [ant_id, ant] : world.get_ants()) {
+        ant.tick(world);
     }
 
     ++std::atomic_ref{atomically_accessed.tick_count};
@@ -47,10 +44,6 @@ void simulation::tick() {
     if(get_tick_count() % 1'000 == 0) {
         std::println("tick(): {}", get_tick_count());
     }
-    world.unlock();
-
-    // TODO: adjust sleep time based on desired simulation framerate
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
     if(get_state() == simulation_state::single_step) {
         pause(true);

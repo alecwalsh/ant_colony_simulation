@@ -8,7 +8,7 @@
 
 namespace ant_sim::gui {
 
-gui::gui(sf::RenderWindow& window, simulation& sim, graphics::world_drawable& world_drawable)
+gui::gui(sf::RenderWindow& window, simulation_mutex& sim, graphics::world_drawable& world_drawable)
     : window{&window}, sim{&sim}, world_drawable{&world_drawable} {
     if(imgui_initialized) {
         throw std::runtime_error{"Dear ImGui has already been initialized"};
@@ -37,7 +37,8 @@ void gui::draw_gui(sf::Time delta_time) {
 
     ImGui::Text("Currently displaying pheromones from nest %u", world_drawable->visible_pheromone_nest_id);
 
-    auto nest_count = static_cast<nest_id_t>(sim->get_world()->get_nests().size());
+    // TODO: Allow retrieving number of nests without locking sim
+    auto nest_count = static_cast<nest_id_t>(sim->lock()->world.get_nests().size());
 
     int i = world_drawable->visible_pheromone_nest_id;
     ImGui::SliderInt("Change visible pheromone nest", &i, 0, nest_count - 1);

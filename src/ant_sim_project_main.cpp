@@ -30,11 +30,14 @@ int main(int argc, char* argv[]) {
         seed = parse_args(std::span{const_cast<const char**>(argv) + 1, static_cast<std::size_t>(argc - 1)});
     }
 
-    ant_sim::simulation sim{100, 100, 1, 10, seed};
+    ant_sim::simulation_mutex sim{100, 100, 1, 10, seed};
 
-    std::jthread simulation_thread{[](const std::stop_token& stop_token, ant_sim::simulation& sim) {
+    std::jthread simulation_thread{[](const std::stop_token& stop_token, ant_sim::simulation_mutex& sim) {
         while(!sim.stopped() && !stop_token.stop_requested()) {
-            sim.tick();
+            sim.lock()->tick();
+
+            // TODO: adjust sleep time based on desired simulation framerate
+            std::this_thread::sleep_for(std::chrono::milliseconds{100});
         }
     }, std::ref(sim)};
 
@@ -52,7 +55,7 @@ int main(int argc, char* argv[]) {
 
     window.setFramerateLimit(max_framerate);
 
-    ant_sim::graphics::world_drawable world_drawable{&sim};
+    ant_sim::graphics::world_drawable world_drawable{sim};
 
     ant_sim::gui::gui gui{window, sim, world_drawable};
 
