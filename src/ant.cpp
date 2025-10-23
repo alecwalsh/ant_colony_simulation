@@ -229,7 +229,7 @@ std::optional<point<>> ant::calculate_next_location(simulation& sim) {
     assert(!(tiles[new_location.y, new_location.x].is_full()));
 
     if(sim.get_log_ant_movements()) {
-        std::println("Moving ant {} to {{{}, {}}} with weight {}", ant_id, new_location.x, new_location.y, weight);
+        std::println("Move,{},{},{},{}", ant_id, new_location.x, new_location.y, weight);
     }
 
     return new_location;

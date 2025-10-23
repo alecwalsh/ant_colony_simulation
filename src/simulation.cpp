@@ -24,7 +24,7 @@ std::minstd_rand get_rng(std::optional<std::uint64_t> seed) {
 
     std::seed_seq seed_seq{seed_parts[0], seed_parts[1]};
 
-    std::println("Using seed {}", static_cast<std::uint64_t>(seed_parts[0]) << 32 | seed_parts[1]);
+    std::println("Seed,{}", static_cast<std::uint64_t>(seed_parts[0]) << 32 | seed_parts[1]);
 
     return std::minstd_rand{seed_seq};
 }
@@ -80,7 +80,7 @@ void simulation::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
 
         nest.location = {x, y};
 
-        std::println("Nest {} placed at {{{}, {}}}", i, y, x);
+        std::println("Nest,{},{},{}", i, y, x);
     }
 
     // Fill nests with ants
@@ -170,10 +170,6 @@ void simulation::tick() {
     new_ants.clear();
 
     ++std::atomic_ref{atomically_accessed.tick_count};
-
-    if(get_tick_count() % 1'000 == 0) {
-        std::println("tick(): {}", get_tick_count());
-    }
 
     if(get_state() == simulation_state::single_step) {
         pause(true);

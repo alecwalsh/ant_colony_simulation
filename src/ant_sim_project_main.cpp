@@ -16,10 +16,6 @@ auto parse_args(std::span<const char*> args) {
 
     std::uint64_t seed = std::stoull(args[0]);
 
-    for(auto arg : args.subspan(1)) {
-        std::println("{}", arg);
-    }
-
     return seed;
 }
 
