@@ -41,7 +41,7 @@ void gui::draw_gui(sf::Time delta_time) const {
 
     // Get speed in updates per second, then allow setting it with a slider
     float speed = 1 / std::chrono::duration<float>{locked_sim->sleep_time}.count();
-    ImGui::SliderFloat("Updates per second", &speed, 0, 100);
+    ImGui::SliderFloat("Updates per second", &speed, 0.5f, 100);
     locked_sim->sleep_time = std::chrono::duration<float>{1 / speed};
 
     auto nest_count = static_cast<nest_id_t>(locked_sim->get_nests().size());
