@@ -55,6 +55,7 @@ void gui::draw_gui(sf::Time delta_time) const {
     ImGui::Begin("Simulation stats");
     ImGui::Text("%s", std::format("Tick: {}", sim->get_tick_count()).c_str());
     ImGui::Text("%s", std::format("Ant count: {}", locked_sim->get_ants().size()).c_str());
+    ImGui::Text("%s", std::format("Total food count: {}", locked_sim->get_food_count()).c_str());
     ImGui::End();
 }
 

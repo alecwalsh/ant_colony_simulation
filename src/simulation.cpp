@@ -118,6 +118,7 @@ void simulation::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
         for(auto x = 0uz; x < tiles.extent(1); x++) {
             if(food_dist(rng) < 0.01f) {
                 tiles[y, x].food_supply = 255;
+                set_food_count(get_food_count() + tiles[y, x].food_supply);
             }
         }
     }
@@ -220,5 +221,13 @@ void simulation::set_log_ant_state_changes(bool log_ant_state_changes) noexcept 
 }
 
 tick_t simulation::get_tick_count() const noexcept { return atomic_read(atomically_accessed.tick_count); }
+
+[[nodiscard]] std::uint64_t simulation::get_food_count() const noexcept {
+    return atomic_read(atomically_accessed.food_count);
+}
+
+void simulation::set_food_count(std::uint64_t food_count) noexcept {
+    std::atomic_ref{atomically_accessed.food_count} = food_count;
+}
 
 } // namespace ant_sim

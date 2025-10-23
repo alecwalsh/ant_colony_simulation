@@ -73,6 +73,8 @@ class simulation {
         // Ensure mouse_location is sufficiently aligned to use with std::atomic_ref
         alignas(std::atomic_ref<point_t>::required_alignment) point_t mouse_location = {0, 0};
 
+        std::uint64_t food_count = 0;
+
         bool log_ant_movements = false;
         bool log_ant_state_changes = false;
     } atomically_accessed;
@@ -110,6 +112,9 @@ class simulation {
     void set_log_ant_state_changes(bool log_ant_state_changes) noexcept;
 
     [[nodiscard]] tick_t get_tick_count() const noexcept;
+
+    [[nodiscard]] std::uint64_t get_food_count() const noexcept;
+    void set_food_count(std::uint64_t food_count) noexcept;
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {

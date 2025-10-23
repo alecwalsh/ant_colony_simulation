@@ -108,6 +108,8 @@ void ant::move(simulation& sim, point<> new_location) {
         new_tile.food_supply -= food_taken;
         food_in_inventory += food_taken;
 
+        sim.set_food_count(sim.get_food_count() - food_taken);
+
         state = state::returning;
 
         if(sim.get_log_ant_state_changes()) {
