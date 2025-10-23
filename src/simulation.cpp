@@ -44,6 +44,21 @@ simulation::simulation(std::size_t rows, std::size_t columns, nest_id_t nest_cou
     generate(nest_count, ant_count_per_nest);
 }
 
+simulation::simulation(simulation_args_t args)
+    : simulation{args.rows, args.columns, args.nest_count, args.ant_count_per_nest, args.seed} {
+    hunger_increase_per_tick = args.hunger_increase_per_tick;
+    hunger_to_die = args.hunger_to_die;
+    food_taken = args.food_taken;
+    food_resupply_rate = args.food_resupply_rate;
+    max_food_supply = args.max_food_supply;
+    food_per_new_ant = args.food_per_new_ant;
+    food_hunger_ratio = args.food_hunger_ratio;
+    falloff_rate = args.falloff_rate;
+    increase_rate = args.increase_rate;
+    type1_avoidance = args.type1_avoidance;
+    type2_avoidance = args.type2_avoidance;
+}
+
 void simulation::queue_ant(nest_id_t nest_id) {
     // clang-format off
     new_ants.push_back({

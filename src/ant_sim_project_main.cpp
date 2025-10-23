@@ -11,22 +11,80 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-auto parse_args(std::span<const char*> args) {
+ant_sim::simulation_args_t parse_args(std::span<const char*> args) {
     assert(!args.empty());
 
-    std::uint64_t seed = std::stoull(args[0]);
+    auto idx = 0uz;
 
-    return seed;
+    ant_sim::simulation_args_t result = {};
+
+    if(idx >= args.size()) return result;
+    if(args[idx] != std::string_view{"random"}) {
+        result.seed = std::stoull(args[idx]);
+    }
+    idx++;
+
+    if(idx >= args.size()) return result;
+    result.rows = std::stoull(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.columns = std::stoull(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.nest_count = std::stoul(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.ant_count_per_nest = std::stoul(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.hunger_increase_per_tick = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.hunger_to_die = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.food_taken = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.food_resupply_rate = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.max_food_supply = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.food_per_new_ant = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.food_hunger_ratio = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.falloff_rate = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.increase_rate = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.type1_avoidance = std::stof(args[idx++]);
+
+    if(idx >= args.size()) return result;
+    result.type2_avoidance = std::stof(args[idx++]);
+
+    return result;
 }
 
 int main(int argc, char* argv[]) {
-    std::optional<std::uint64_t> seed;
+    ant_sim::simulation_args_t args = {};
 
     if(argc > 1) {
-        seed = parse_args(std::span{const_cast<const char**>(argv) + 1, static_cast<std::size_t>(argc - 1)});
+        try {
+            args = parse_args(std::span{const_cast<const char**>(argv) + 1, static_cast<std::size_t>(argc - 1)});
+        } catch(...) {
+            std::println("Error parsing arguments");
+            return EXIT_FAILURE;
+        }
     }
 
-    ant_sim::simulation_mutex sim{100, 100, 1, 2, seed};
+    ant_sim::simulation_mutex sim{args};
 
     std::jthread simulation_thread{[](const std::stop_token& stop_token, ant_sim::simulation_mutex& sim) {
         while(!sim.stopped() && !stop_token.stop_requested()) {

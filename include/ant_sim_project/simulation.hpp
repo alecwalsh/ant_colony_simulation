@@ -18,7 +18,26 @@ namespace ant_sim {
 
 namespace stdex = std::experimental;
 
-// TODO: Support separate values for each pheromone type
+struct simulation_args_t {
+    std::optional<std::uint64_t> seed;
+
+    std::size_t rows = 100;
+    std::size_t columns = 100;
+    nest_id_t nest_count = 2;
+    ant_id_t ant_count_per_nest = 10;
+
+    float hunger_increase_per_tick = 1.0f;
+    float hunger_to_die = 100.0f;
+    food_supply_t food_taken = 50;
+    food_supply_t food_resupply_rate = 5;
+    food_supply_t max_food_supply = 500;
+    food_supply_t food_per_new_ant = 150;
+    float food_hunger_ratio = 1.0f;
+    float falloff_rate = 0.025f;
+    pheromone_strength_t increase_rate = 6;
+    float type1_avoidance = 1.0f;
+    float type2_avoidance = 1.0f;
+};
 
 class simulation {
   public:
@@ -94,6 +113,7 @@ class simulation {
   public:
     simulation(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count_per_nest,
                std::optional<std::uint64_t> seed = {});
+    simulation(simulation_args_t args);
 
     [[nodiscard]] simulation_state get_state() const noexcept;
     void set_state(simulation_state new_state) noexcept;
