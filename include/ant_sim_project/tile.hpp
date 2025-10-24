@@ -10,7 +10,7 @@ namespace ant_sim {
 struct tile {
     static constexpr std::size_t pheromone_type_count = 2;
 
-    static constexpr nest_id_t max_nests = 2;
+    static constexpr nest_id_t max_nests = 20;
 
     // Using struct of arrays instead of array of structs decreases sizeof(tile)
     struct pheromone_trails {
