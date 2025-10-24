@@ -39,6 +39,7 @@ void world_drawable::draw_info(simulation& locked_sim) const {
 
     if(x < 0 || y < 0) {
         // Tile is out of bounds, and therefore has no associated information to display
+        ImGui::End();
         return;
     }
 
