@@ -73,6 +73,11 @@ ant_sim::simulation_args_t parse_args(std::span<const char*> args) {
 }
 
 int main(int argc, char* argv[]) {
+    for(int i = 0; i < argc; i++) {
+        std::print("{} ", argv[i]);
+    }
+    std::println("");
+
     ant_sim::simulation_args_t args = {};
 
     if(argc > 1) {
