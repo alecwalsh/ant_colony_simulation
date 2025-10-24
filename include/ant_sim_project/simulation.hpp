@@ -50,23 +50,23 @@ class simulation {
 
     float food_chance = 0.01f; // Chance that any given tile has food
 
-    float hunger_increase_per_tick = 1.0f;
-    float hunger_to_die = 100.0f;
-    food_supply_t food_taken = 5;         // The amount of food ants take when they encounter a food source
-    food_supply_t food_resupply_rate = 5; // The amount of food each food source regenerates per tick
-    food_supply_t max_food_supply = 500;
+    float hunger_increase_per_tick;
+    float hunger_to_die;
+    food_supply_t food_taken;         // The amount of food ants take when they encounter a food source
+    food_supply_t food_resupply_rate; // The amount of food each food source regenerates per tick
+    food_supply_t max_food_supply;
     food_supply_t food_per_new_ant = 150; // Food needed for a queen to produce a new ant
-    float food_hunger_ratio = 1.0f;
+    float food_hunger_ratio;
 
     // How much a pheromone's strength decreases each tick
-    float falloff_rate = 0.025f;
+    float falloff_rate;
 
     // How much a pheromone's strength increases when left by an ant
-    pheromone_strength_t increase_rate = 3 * 4;
+    pheromone_strength_t increase_rate;
 
     // These variables control how strongly ants avoid backtracking
-    float type1_avoidance = 1.0f; // How strongly ants avoid type 1 pheromones when searching for food
-    float type2_avoidance = 1.0f; // How strongly ants avoid type 2 pheromones when returning to their nest with food
+    float type1_avoidance; // How strongly ants avoid type 1 pheromones when searching for food
+    float type2_avoidance; // How strongly ants avoid type 2 pheromones when returning to their nest with food
 
     // A value from this distribution is added to pheromone strength when calculating weights
     std::uniform_real_distribution<float> add_dist{-0.1f, 0.1f};
@@ -110,9 +110,10 @@ class simulation {
     // The lowest unused id
     ant_id_t next_id = 0;
 
-  public:
     simulation(std::size_t rows, std::size_t columns, nest_id_t nest_count, ant_id_t ant_count_per_nest,
                std::optional<std::uint64_t> seed = {});
+
+  public:
     simulation(simulation_args_t args);
 
     [[nodiscard]] simulation_state get_state() const noexcept;
