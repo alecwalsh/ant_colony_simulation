@@ -149,6 +149,8 @@ class simulation {
   public:
     simulation(simulation_args_t args);
 
+    auto& get_atomically_accessed(this auto&& self) noexcept { return self.atomically_accessed; }
+
     // Checks if state == simulation_state::stopped
     [[nodiscard]] bool stopped() const noexcept;
     // Sets state to simulation_state::stopped
@@ -171,8 +173,6 @@ class simulation {
     [[nodiscard]] auto log_ant_state_changes(this auto&& self) noexcept {
         return self.get_atomically_accessed().log_ant_state_changes();
     }
-
-    auto& get_atomically_accessed(this auto&& self) noexcept { return self.atomically_accessed; }
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
