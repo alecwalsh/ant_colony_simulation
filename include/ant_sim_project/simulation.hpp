@@ -90,18 +90,68 @@ class simulation {
 
     // All members of this struct must always be accessed via std::atomic_ref, as multiple threads may access them.
     // Each member is independent of the others.  There is no need to pass the entire struct to std::atomic_ref.
-    struct {
-        tick_t tick_count = 0;
-        simulation_state state = simulation_state::running;
+    struct atomically_accessed_t {
+      public:
+        tick_t tick_count_ = 0;
+        simulation_state state_ = simulation_state::running;
 
         using point_t = point<float>;
         // Ensure mouse_location is sufficiently aligned to use with std::atomic_ref
-        alignas(std::atomic_ref<point_t>::required_alignment) point_t mouse_location = {0, 0};
+        alignas(std::atomic_ref<point_t>::required_alignment) point_t mouse_location_ = {0, 0};
 
-        float food_count = 0;
+        float food_count_ = 0;
 
-        bool log_ant_movements = false;
-        bool log_ant_state_changes = true;
+        bool log_ant_movements_ = false;
+        bool log_ant_state_changes_ = true;
+
+      public:
+        [[nodiscard]] simulation_state get_state() const noexcept;
+        void set_state(simulation_state new_state) noexcept;
+
+        // Checks if state == simulation_state::stopped
+        [[nodiscard]] bool stopped() const noexcept;
+        // Sets state to simulation_state::stopped
+        void stop() noexcept;
+
+        // Checks if state == simulation_state::paused
+        [[nodiscard]] bool paused() const noexcept;
+        // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
+        void pause(bool is_paused = true) noexcept;
+
+        [[nodiscard]] point<float> get_mouse_location() const noexcept;
+        void set_mouse_location(point<float> location) noexcept;
+
+        [[nodiscard]] bool get_log_ant_movements() const noexcept;
+        void set_log_ant_movements(bool log_ant_movements) noexcept;
+
+        [[nodiscard]] bool get_log_ant_state_changes() const noexcept;
+        void set_log_ant_state_changes(bool log_ant_state_changes) noexcept;
+
+        [[nodiscard]] float get_food_count() const noexcept;
+        void set_food_count(float food_count) noexcept;
+
+        [[nodiscard]] tick_t get_tick_count() const noexcept;
+
+        // libc++ doesn't support atomic_ref<T> with const T yet
+        // The const qualified accessors return T instead of std::atomic_ref<const T> as a result
+
+        [[nodiscard]] std::atomic_ref<tick_t> tick_count() noexcept;
+        [[nodiscard]] tick_t tick_count() const noexcept;
+
+        [[nodiscard]] std::atomic_ref<simulation_state> state() noexcept;
+        [[nodiscard]] simulation_state state() const noexcept;
+
+        [[nodiscard]] std::atomic_ref<point_t> mouse_location() noexcept;
+        [[nodiscard]] point_t mouse_location() const noexcept;
+
+        [[nodiscard]] std::atomic_ref<float> food_count() noexcept;
+        [[nodiscard]] float food_count() const noexcept;
+
+        [[nodiscard]] std::atomic_ref<bool> log_ant_movements() noexcept;
+        [[nodiscard]] bool log_ant_movements() const noexcept;
+
+        [[nodiscard]] std::atomic_ref<bool> log_ant_state_changes() noexcept;
+        [[nodiscard]] bool log_ant_state_changes() const noexcept;
     } atomically_accessed;
 
     // Holds new ants that have not yet been added to the simulation
@@ -142,6 +192,8 @@ class simulation {
 
     [[nodiscard]] float get_food_count() const noexcept;
     void set_food_count(float food_count) noexcept;
+
+    auto& get_atomically_accessed(this auto&& self) noexcept { return self.atomically_accessed; }
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
