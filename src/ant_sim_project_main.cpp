@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
                     auto p = sim.paused();
                     sim.pause(!p);
                 } else if(key->code == sf::Keyboard::Key::Period) {
-                    sim.get_state() = ant_sim::simulation::simulation_state::single_step;
+                    sim.state() = ant_sim::simulation::simulation_state::single_step;
                 }
             } else if(const auto* key = event->getIf<sf::Event::KeyPressed>()) {
                 auto view = window.getView();

@@ -134,7 +134,7 @@ void simulation::generate(nest_id_t nest_count, ant_id_t ant_count_per_nest) {
             if(food_dist(rng) < food_chance) {
                 food_sources.push_back({x, y});
                 tiles[y, x].food_supply = 255;
-                set_food_count(food_count() + tiles[y, x].food_supply);
+                food_count() += tiles[y, x].food_supply;
             }
         }
     }
@@ -162,7 +162,7 @@ void simulation::update_pheromones(tile::pheromone_trails& pheromone_trails, tic
 void simulation::tick() {
     if(paused()) return;
 
-    std::println("Tick,{},{},{}", ants.size(), get_tick_count(), food_count().load());
+    std::println("Tick,{},{},{}", ants.size(), tick_count().load(), food_count().load());
 
     for(auto it = ants.begin(); it != ants.end();) {
         auto& ant = it->second;
@@ -193,10 +193,10 @@ void simulation::tick() {
 
         auto food_diff = get_tiles()[y, x].food_supply - old_food_supply;
 
-        set_food_count(food_count() + food_diff);
+        food_count() += food_diff;
     }
 
-    ++std::atomic_ref{atomically_accessed.tick_count_};
+    ++tick_count();
 
     if(state() == simulation_state::single_step) {
         pause(true);
@@ -212,9 +212,6 @@ T atomic_read(const T& t) noexcept {
     return std::atomic_ref{const_cast<T&>(t)};
 }
 
-std::atomic_ref<simulation::simulation_state> simulation::state() noexcept { return atomically_accessed.state(); }
-simulation::simulation_state simulation::state() const noexcept { return atomically_accessed.state(); }
-
 bool simulation::stopped() const noexcept { return state() == simulation_state::stopped; }
 
 void simulation::stop() noexcept { state() = simulation_state::stopped; }
@@ -225,67 +222,14 @@ void simulation::pause(bool is_paused) noexcept {
     state() = is_paused ? simulation_state::paused : simulation_state::running;
 }
 
-std::atomic_ref<point<float>> simulation::mouse_location() noexcept { return atomically_accessed.mouse_location(); }
-point<float> simulation::mouse_location() const noexcept { return atomic_read(atomically_accessed.mouse_location_); }
+bool simulation::atomically_accessed_t::stopped() const noexcept { return state() == simulation_state::stopped; }
 
-tick_t simulation::get_tick_count() const noexcept { return atomic_read(atomically_accessed.tick_count_); }
+void simulation::atomically_accessed_t::stop() noexcept { state() = simulation_state::stopped; }
 
-[[nodiscard]] std::atomic_ref<float> simulation::food_count() noexcept { return atomically_accessed.food_count(); }
-[[nodiscard]] float simulation::food_count() const noexcept { return atomically_accessed.food_count(); }
-
-void simulation::set_food_count(float food_count) noexcept {
-    std::atomic_ref{atomically_accessed.food_count_} = food_count;
-}
-
-std::atomic_ref<simulation::simulation_state> simulation::atomically_accessed_t::get_state() noexcept {
-    return std::atomic_ref{state_};
-}
-simulation::simulation_state simulation::atomically_accessed_t::get_state() const noexcept {
-    return atomic_read(state_);
-}
-
-bool simulation::atomically_accessed_t::stopped() const noexcept { return get_state() == simulation_state::stopped; }
-
-void simulation::atomically_accessed_t::stop() noexcept { get_state() = simulation_state::stopped; }
-
-bool simulation::atomically_accessed_t::paused() const noexcept { return get_state() == simulation_state::paused; }
+bool simulation::atomically_accessed_t::paused() const noexcept { return state() == simulation_state::paused; }
 
 void simulation::atomically_accessed_t::pause(bool is_paused) noexcept {
-    get_state() = is_paused ? simulation_state::paused : simulation_state::running;
-}
-
-point<float> simulation::atomically_accessed_t::get_mouse_location() const noexcept {
-    return atomic_read(mouse_location_);
-}
-
-void simulation::atomically_accessed_t::set_mouse_location(point<float> location) noexcept {
-    std::atomic_ref{mouse_location_} = location;
-}
-
-bool simulation::atomically_accessed_t::get_log_ant_movements() const noexcept {
-    return atomic_read(log_ant_movements_);
-}
-
-void simulation::atomically_accessed_t::set_log_ant_movements(bool log_ant_movements) noexcept {
-    std::atomic_ref{this->log_ant_movements_} = log_ant_movements;
-}
-
-bool simulation::atomically_accessed_t::get_log_ant_state_changes() const noexcept {
-    return atomic_read(log_ant_state_changes_);
-}
-
-void simulation::atomically_accessed_t::set_log_ant_state_changes(bool log_ant_state_changes) noexcept {
-    std::atomic_ref{this->log_ant_state_changes_} = log_ant_state_changes;
-}
-
-tick_t simulation::atomically_accessed_t::get_tick_count() const noexcept { return atomic_read(tick_count_); }
-
-[[nodiscard]] float simulation::atomically_accessed_t::get_food_count() const noexcept {
-    return atomic_read(food_count_);
-}
-
-void simulation::atomically_accessed_t::set_food_count(float food_count) noexcept {
-    std::atomic_ref{this->food_count_} = food_count;
+    state() = is_paused ? simulation_state::paused : simulation_state::running;
 }
 
 [[nodiscard]] std::atomic_ref<tick_t> simulation::atomically_accessed_t::tick_count() noexcept {

@@ -89,7 +89,7 @@ void ant::move(simulation& sim, point<> new_location) {
     }
 
     for(auto i = 0uz; i < tile::pheromone_type_count; i++) {
-        assert(new_tile.pheromones.last_updated[nest_id][i] == sim.get_tick_count());
+        assert(new_tile.pheromones.last_updated[nest_id][i] == sim.tick_count());
     }
     // Apply pheromone trails
     current_tile.pheromones.pheromone_strength[nest_id][std::to_underlying(state)] += sim.increase_rate;
@@ -108,11 +108,11 @@ void ant::move(simulation& sim, point<> new_location) {
         new_tile.food_supply -= food_taken;
         food_in_inventory += food_taken;
 
-        sim.set_food_count(sim.food_count() - food_taken);
+        sim.food_count() -= food_taken;
 
         state = state::returning;
 
-        if(sim.get_atomically_accessed().log_ant_state_changes()) {
+        if(sim.log_ant_state_changes()) {
             std::println("StateChange,Returning,{},{},{},{},{}", ant_id, nest_id, location.x, location.y, food_taken);
         }
     }
@@ -136,7 +136,7 @@ void ant::move(simulation& sim, point<> new_location) {
 
         state = state::searching;
 
-        if(sim.get_atomically_accessed().get_log_ant_state_changes()) {
+        if(sim.log_ant_state_changes()) {
             std::println("StateChange,Searching,{},{},{},{},{}", ant_id, nest_id, location.x, location.y, food_deposited);
         }
     }
@@ -192,7 +192,7 @@ std::optional<point<>> ant::calculate_next_location(simulation& sim) {
 
     auto has_value = []<typename T>(const std::optional<T>& opt) { return opt.has_value(); };
 
-    auto current_tick = sim.get_tick_count();
+    auto current_tick = sim.tick_count().load();
 
     struct result_t {
         point<> location;
@@ -228,7 +228,7 @@ std::optional<point<>> ant::calculate_next_location(simulation& sim) {
 
     assert(!(tiles[new_location.y, new_location.x].is_full()));
 
-    if(sim.get_atomically_accessed().get_log_ant_movements()) {
+    if(sim.log_ant_movements()) {
         std::println("Move,{},{},{},{}", ant_id, new_location.x, new_location.y, weight);
     }
 

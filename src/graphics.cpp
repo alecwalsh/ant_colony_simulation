@@ -97,7 +97,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
             // Make sure pheromone values are up to date before drawing
             for(nest_id_t i = 0uz; i < tile::pheromone_type_count; i++) {
-                locked_sim->update_pheromones(tile.pheromones, sim->get_tick_count(), i);
+                locked_sim->update_pheromones(tile.pheromones, sim->tick_count(), i);
             }
 
             if(tile.has_nest) {

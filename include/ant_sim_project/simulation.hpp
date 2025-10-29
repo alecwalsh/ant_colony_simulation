@@ -91,7 +91,7 @@ class simulation {
     // All members of this struct must always be accessed via std::atomic_ref, as multiple threads may access them.
     // Each member is independent of the others.  There is no need to pass the entire struct to std::atomic_ref.
     struct atomically_accessed_t {
-      public:
+      private:
         tick_t tick_count_ = 0;
         simulation_state state_ = simulation_state::running;
 
@@ -105,9 +105,6 @@ class simulation {
         bool log_ant_state_changes_ = true;
 
       public:
-        [[nodiscard]] std::atomic_ref<simulation_state> get_state() noexcept;
-        [[nodiscard]] simulation_state get_state() const noexcept;
-
         // Checks if state == simulation_state::stopped
         [[nodiscard]] bool stopped() const noexcept;
         // Sets state to simulation_state::stopped
@@ -117,20 +114,6 @@ class simulation {
         [[nodiscard]] bool paused() const noexcept;
         // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
         void pause(bool is_paused = true) noexcept;
-
-        [[nodiscard]] point<float> get_mouse_location() const noexcept;
-        void set_mouse_location(point<float> location) noexcept;
-
-        [[nodiscard]] bool get_log_ant_movements() const noexcept;
-        void set_log_ant_movements(bool log_ant_movements) noexcept;
-
-        [[nodiscard]] bool get_log_ant_state_changes() const noexcept;
-        void set_log_ant_state_changes(bool log_ant_state_changes) noexcept;
-
-        [[nodiscard]] float get_food_count() const noexcept;
-        void set_food_count(float food_count) noexcept;
-
-        [[nodiscard]] tick_t get_tick_count() const noexcept;
 
         // libc++ doesn't support atomic_ref<T> with const T yet
         // The const qualified accessors return T instead of std::atomic_ref<const T> as a result
@@ -166,9 +149,6 @@ class simulation {
   public:
     simulation(simulation_args_t args);
 
-    [[nodiscard]] std::atomic_ref<simulation_state> state() noexcept;
-    [[nodiscard]] simulation_state state() const noexcept;
-
     // Checks if state == simulation_state::stopped
     [[nodiscard]] bool stopped() const noexcept;
     // Sets state to simulation_state::stopped
@@ -179,14 +159,18 @@ class simulation {
     // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
     void pause(bool is_paused = true) noexcept;
 
-    std::atomic_ref<point<float>> mouse_location() noexcept;
-    point<float> mouse_location() const noexcept;
-
-    [[nodiscard]] tick_t get_tick_count() const noexcept;
-
-    [[nodiscard]] std::atomic_ref<float> food_count() noexcept;
-    [[nodiscard]] float food_count() const noexcept;
-    void set_food_count(float food_count) noexcept;
+    [[nodiscard]] auto state(this auto&& self) noexcept { return self.get_atomically_accessed().state(); }
+    [[nodiscard]] auto mouse_location(this auto&& self) noexcept {
+        return self.get_atomically_accessed().mouse_location();
+    }
+    [[nodiscard]] auto food_count(this auto&& self) noexcept { return self.get_atomically_accessed().food_count(); }
+    [[nodiscard]] auto tick_count(this auto&& self) noexcept { return self.get_atomically_accessed().tick_count(); }
+    [[nodiscard]] auto log_ant_movements(this auto&& self) noexcept {
+        return self.get_atomically_accessed().log_ant_movements();
+    }
+    [[nodiscard]] auto log_ant_state_changes(this auto&& self) noexcept {
+        return self.get_atomically_accessed().log_ant_state_changes();
+    }
 
     auto& get_atomically_accessed(this auto&& self) noexcept { return self.atomically_accessed; }
 
@@ -232,10 +216,6 @@ class simulation_mutex {
     // These methods simply call the methods on the protected simulation, without locking
     // This is safe because they all access the members using std::atomic_ref
 
-    [[nodiscard]] std::atomic_ref<simulation::simulation_state> get_state(this auto&& self) noexcept {
-        return self.get_atomically_accessed().get_state();
-    }
-
     // Checks if state == simulation_state::stopped
     [[nodiscard]] bool stopped() const noexcept { return sim.get_unsafe().stopped(); }
     // Sets state to simulation_state::stopped
@@ -245,6 +225,10 @@ class simulation_mutex {
     [[nodiscard]] bool paused() const noexcept { return sim.get_unsafe().paused(); }
     // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
     void pause(bool is_paused = true) noexcept { sim.get_unsafe().pause(is_paused); }
+
+    [[nodiscard]] auto state(this auto&& self) noexcept {
+        return self.get_atomically_accessed().state();
+    }
 
     [[nodiscard]] auto mouse_location(this auto&& self) noexcept {
         return self.get_atomically_accessed().mouse_location();
@@ -258,7 +242,7 @@ class simulation_mutex {
         return self.get_atomically_accessed().log_ant_state_changes();
     }
 
-    [[nodiscard]] tick_t get_tick_count() const noexcept { return get_atomically_accessed().get_tick_count(); }
+    [[nodiscard]] auto tick_count(this auto&& self) noexcept { return self.get_atomically_accessed().tick_count(); }
 };
 
 } // namespace ant_sim
