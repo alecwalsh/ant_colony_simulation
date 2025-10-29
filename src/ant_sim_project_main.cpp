@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
                     auto p = sim.paused();
                     sim.pause(!p);
                 } else if(key->code == sf::Keyboard::Key::Period) {
-                    sim.set_state(ant_sim::simulation::simulation_state::single_step);
+                    sim.get_state() = ant_sim::simulation::simulation_state::single_step;
                 }
             } else if(const auto* key = event->getIf<sf::Event::KeyPressed>()) {
                 auto view = window.getView();
@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
             } else if(const auto* mouse_move = event->getIf<sf::Event::MouseMoved>()) {
                 auto [x, y] = window.mapPixelToCoords(mouse_move->position);
 
-                sim.set_mouse_location({x, y});
+                sim.mouse_location() = {x, y};
             }
         }
 

@@ -33,7 +33,7 @@ get_visible_area(const sf::View& view, stdex::mdspan<tile, stdex::dextents<std::
 }
 
 void world_drawable::draw_info(simulation& locked_sim) const {
-    auto [x, y] = sim->get_mouse_location();
+    auto [x, y] = sim->mouse_location().load();
 
     ImGui::Begin("Current tile info");
 

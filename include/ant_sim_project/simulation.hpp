@@ -105,8 +105,8 @@ class simulation {
         bool log_ant_state_changes_ = true;
 
       public:
+        [[nodiscard]] std::atomic_ref<simulation_state> get_state() noexcept;
         [[nodiscard]] simulation_state get_state() const noexcept;
-        void set_state(simulation_state new_state) noexcept;
 
         // Checks if state == simulation_state::stopped
         [[nodiscard]] bool stopped() const noexcept;
@@ -166,8 +166,8 @@ class simulation {
   public:
     simulation(simulation_args_t args);
 
-    [[nodiscard]] simulation_state get_state() const noexcept;
-    void set_state(simulation_state new_state) noexcept;
+    [[nodiscard]] std::atomic_ref<simulation_state> state() noexcept;
+    [[nodiscard]] simulation_state state() const noexcept;
 
     // Checks if state == simulation_state::stopped
     [[nodiscard]] bool stopped() const noexcept;
@@ -179,18 +179,13 @@ class simulation {
     // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
     void pause(bool is_paused = true) noexcept;
 
-    point<float> get_mouse_location() const noexcept;
-    void set_mouse_location(point<float> location) noexcept;
-
-    bool get_log_ant_movements() const noexcept;
-    void set_log_ant_movements(bool log_ant_movements) noexcept;
-
-    bool get_log_ant_state_changes() const noexcept;
-    void set_log_ant_state_changes(bool log_ant_state_changes) noexcept;
+    std::atomic_ref<point<float>> mouse_location() noexcept;
+    point<float> mouse_location() const noexcept;
 
     [[nodiscard]] tick_t get_tick_count() const noexcept;
 
-    [[nodiscard]] float get_food_count() const noexcept;
+    [[nodiscard]] std::atomic_ref<float> food_count() noexcept;
+    [[nodiscard]] float food_count() const noexcept;
     void set_food_count(float food_count) noexcept;
 
     auto& get_atomically_accessed(this auto&& self) noexcept { return self.atomically_accessed; }
@@ -227,6 +222,8 @@ class simulation {
 class simulation_mutex {
     mutex_with_data<simulation> sim;
 
+    auto& get_atomically_accessed(this auto&& self) noexcept { return self.sim.get_unsafe().get_atomically_accessed(); }
+
   public:
     explicit simulation_mutex(auto&&... args) : sim(std::in_place, std::forward<decltype(args)>(args)...) {}
 
@@ -235,8 +232,9 @@ class simulation_mutex {
     // These methods simply call the methods on the protected simulation, without locking
     // This is safe because they all access the members using std::atomic_ref
 
-    [[nodiscard]] simulation::simulation_state get_state() const noexcept { return sim.get_unsafe().get_state(); }
-    void set_state(simulation::simulation_state new_state) noexcept { sim.get_unsafe().set_state(new_state); }
+    [[nodiscard]] std::atomic_ref<simulation::simulation_state> get_state(this auto&& self) noexcept {
+        return self.get_atomically_accessed().get_state();
+    }
 
     // Checks if state == simulation_state::stopped
     [[nodiscard]] bool stopped() const noexcept { return sim.get_unsafe().stopped(); }
@@ -248,20 +246,19 @@ class simulation_mutex {
     // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
     void pause(bool is_paused = true) noexcept { sim.get_unsafe().pause(is_paused); }
 
-    point<float> get_mouse_location() const noexcept { return sim.get_unsafe().get_mouse_location(); }
-    void set_mouse_location(point<float> location) noexcept { sim.get_unsafe().set_mouse_location(location); }
-
-    bool get_log_ant_movements() const noexcept { return sim.get_unsafe().get_log_ant_movements(); }
-    void set_log_ant_movements(bool log_ant_movements) noexcept {
-        sim.get_unsafe().set_log_ant_movements(log_ant_movements);
+    [[nodiscard]] auto mouse_location(this auto&& self) noexcept {
+        return self.get_atomically_accessed().mouse_location();
     }
 
-    bool get_log_ant_state_changes() const noexcept { return sim.get_unsafe().get_log_ant_state_changes(); }
-    void set_log_ant_state_changes(bool log_ant_state_changes) noexcept {
-        sim.get_unsafe().set_log_ant_state_changes(log_ant_state_changes);
+    [[nodiscard]] auto log_ant_movements(this auto&& self) noexcept {
+        return self.get_atomically_accessed().log_ant_movements();
     }
 
-    [[nodiscard]] tick_t get_tick_count() const noexcept { return sim.get_unsafe().get_tick_count(); }
+    [[nodiscard]] auto log_ant_state_changes(this auto&& self) noexcept {
+        return self.get_atomically_accessed().log_ant_state_changes();
+    }
+
+    [[nodiscard]] tick_t get_tick_count() const noexcept { return get_atomically_accessed().get_tick_count(); }
 };
 
 } // namespace ant_sim

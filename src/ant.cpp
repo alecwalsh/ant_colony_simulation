@@ -108,11 +108,11 @@ void ant::move(simulation& sim, point<> new_location) {
         new_tile.food_supply -= food_taken;
         food_in_inventory += food_taken;
 
-        sim.set_food_count(sim.get_food_count() - food_taken);
+        sim.set_food_count(sim.food_count() - food_taken);
 
         state = state::returning;
 
-        if(sim.get_log_ant_state_changes()) {
+        if(sim.get_atomically_accessed().log_ant_state_changes()) {
             std::println("StateChange,Returning,{},{},{},{},{}", ant_id, nest_id, location.x, location.y, food_taken);
         }
     }
@@ -136,7 +136,7 @@ void ant::move(simulation& sim, point<> new_location) {
 
         state = state::searching;
 
-        if(sim.get_log_ant_state_changes()) {
+        if(sim.get_atomically_accessed().get_log_ant_state_changes()) {
             std::println("StateChange,Searching,{},{},{},{},{}", ant_id, nest_id, location.x, location.y, food_deposited);
         }
     }
@@ -228,7 +228,7 @@ std::optional<point<>> ant::calculate_next_location(simulation& sim) {
 
     assert(!(tiles[new_location.y, new_location.x].is_full()));
 
-    if(sim.get_log_ant_movements()) {
+    if(sim.get_atomically_accessed().get_log_ant_movements()) {
         std::println("Move,{},{},{},{}", ant_id, new_location.x, new_location.y, weight);
     }
 
