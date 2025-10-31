@@ -232,18 +232,13 @@ void atomically_accessed_t::pause(bool is_paused) noexcept {
     state() = is_paused ? simulation_state::paused : simulation_state::running;
 }
 
-std::atomic_ref<tick_t> atomically_accessed_t::tick_count() noexcept {
-    return std::atomic_ref{tick_count_};
-}
+std::atomic_ref<tick_t> atomically_accessed_t::tick_count() noexcept { return std::atomic_ref{tick_count_}; }
 tick_t atomically_accessed_t::tick_count() const noexcept { return atomic_read(tick_count_); }
 
-std::atomic_ref<simulation_state> atomically_accessed_t::state() noexcept {
-    return std::atomic_ref{state_};
-}
+std::atomic_ref<simulation_state> atomically_accessed_t::state() noexcept { return std::atomic_ref{state_}; }
 simulation_state atomically_accessed_t::state() const noexcept { return atomic_read(state_); }
 
-std::atomic_ref<atomically_accessed_t::point_t>
-atomically_accessed_t::mouse_location() noexcept {
+std::atomic_ref<atomically_accessed_t::point_t> atomically_accessed_t::mouse_location() noexcept {
     return std::atomic_ref{mouse_location_};
 }
 atomically_accessed_t::point_t atomically_accessed_t::mouse_location() const noexcept {
@@ -261,8 +256,6 @@ bool atomically_accessed_t::log_ant_movements() const noexcept { return atomic_r
 std::atomic_ref<bool> atomically_accessed_t::log_ant_state_changes() noexcept {
     return std::atomic_ref{log_ant_state_changes_};
 }
-bool atomically_accessed_t::log_ant_state_changes() const noexcept {
-    return atomic_read(log_ant_state_changes_);
-}
+bool atomically_accessed_t::log_ant_state_changes() const noexcept { return atomic_read(log_ant_state_changes_); }
 
 } // namespace ant_sim

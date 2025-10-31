@@ -33,7 +33,7 @@ get_visible_area(const sf::View& view, stdex::mdspan<tile, stdex::dextents<std::
 }
 
 void world_drawable::draw_info(simulation& locked_sim) const {
-    auto [x, y] = sim->mouse_location().load();
+    auto [x, y] = locked_sim.mouse_location().load();
 
     ImGui::Begin("Current tile info");
 
@@ -97,7 +97,7 @@ void world_drawable::draw(sf::RenderTarget& target, sf::RenderStates states) con
 
             // Make sure pheromone values are up to date before drawing
             for(nest_id_t i = 0uz; i < tile::pheromone_type_count; i++) {
-                locked_sim->update_pheromones(tile.pheromones, sim->tick_count(), i);
+                locked_sim->update_pheromones(tile.pheromones, locked_sim->tick_count(), i);
             }
 
             if(tile.has_nest) {

@@ -95,7 +95,7 @@ struct atomically_accessed_t {
     [[nodiscard]] bool log_ant_state_changes() const noexcept;
 };
 
-class simulation {
+class simulation : public atomically_accessed_t {
   public:
     float food_chance = 0.01f; // Chance that any given tile has food
 
@@ -137,8 +137,6 @@ class simulation {
 
     std::vector<point<>> food_sources;
 
-    atomically_accessed_t atomically_accessed;
-
     // Holds new ants that have not yet been added to the simulation
     std::vector<ant> new_ants;
 
@@ -151,8 +149,6 @@ class simulation {
   public:
     simulation(simulation_args_t args);
 
-    auto& get_atomically_accessed(this auto&& self) noexcept { return self.atomically_accessed; }
-
     // Checks if state == simulation_state::stopped
     [[nodiscard]] bool stopped() const noexcept;
     // Sets state to simulation_state::stopped
@@ -162,19 +158,6 @@ class simulation {
     [[nodiscard]] bool paused() const noexcept;
     // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
     void pause(bool is_paused = true) noexcept;
-
-    [[nodiscard]] auto state(this auto&& self) noexcept { return self.get_atomically_accessed().state(); }
-    [[nodiscard]] auto mouse_location(this auto&& self) noexcept {
-        return self.get_atomically_accessed().mouse_location();
-    }
-    [[nodiscard]] auto food_count(this auto&& self) noexcept { return self.get_atomically_accessed().food_count(); }
-    [[nodiscard]] auto tick_count(this auto&& self) noexcept { return self.get_atomically_accessed().tick_count(); }
-    [[nodiscard]] auto log_ant_movements(this auto&& self) noexcept {
-        return self.get_atomically_accessed().log_ant_movements();
-    }
-    [[nodiscard]] auto log_ant_state_changes(this auto&& self) noexcept {
-        return self.get_atomically_accessed().log_ant_state_changes();
-    }
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
@@ -208,12 +191,13 @@ class simulation {
 class simulation_mutex {
     mutex_with_data<simulation> sim;
 
-    auto& get_atomically_accessed(this auto&& self) noexcept { return self.sim.get_unsafe().get_atomically_accessed(); }
-
   public:
     explicit simulation_mutex(auto&&... args) : sim(std::in_place, std::forward<decltype(args)>(args)...) {}
 
     [[nodiscard]] auto lock(this auto&& self) { return self.sim.lock(); }
+
+    [[nodiscard]] atomically_accessed_t& get_atomically_accessed() noexcept { return sim.get_unsafe(); }
+    [[nodiscard]] const atomically_accessed_t& get_atomically_accessed() const noexcept { return sim.get_unsafe(); }
 
     // These methods simply call the methods on the protected simulation, without locking
     // This is safe because they all access the members using std::atomic_ref
@@ -227,22 +211,6 @@ class simulation_mutex {
     [[nodiscard]] bool paused() const noexcept { return sim.get_unsafe().paused(); }
     // Sets state to simulation_state::paused or simulation_state::running, depending on the argument's value
     void pause(bool is_paused = true) noexcept { sim.get_unsafe().pause(is_paused); }
-
-    [[nodiscard]] auto state(this auto&& self) noexcept { return self.get_atomically_accessed().state(); }
-
-    [[nodiscard]] auto mouse_location(this auto&& self) noexcept {
-        return self.get_atomically_accessed().mouse_location();
-    }
-
-    [[nodiscard]] auto log_ant_movements(this auto&& self) noexcept {
-        return self.get_atomically_accessed().log_ant_movements();
-    }
-
-    [[nodiscard]] auto log_ant_state_changes(this auto&& self) noexcept {
-        return self.get_atomically_accessed().log_ant_state_changes();
-    }
-
-    [[nodiscard]] auto tick_count(this auto&& self) noexcept { return self.get_atomically_accessed().tick_count(); }
 };
 
 } // namespace ant_sim
