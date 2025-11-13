@@ -272,6 +272,8 @@ void ant::tick(simulation& sim) {
             dead = true;
             sim.get_tiles()[location.y, location.x].has_ant = false;
 
+            sim.increment_deaths();
+
             return;
         }
 

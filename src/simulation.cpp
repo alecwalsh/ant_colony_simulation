@@ -68,6 +68,8 @@ void simulation::queue_ant(nest_id_t nest_id) {
         .location = nests[nest_id].location
     });
     // clang-format on
+
+    increment_births();
 }
 
 void simulation::add_ant(ant new_ant) {
@@ -256,6 +258,21 @@ tick_t simulation::get_tick_count() const noexcept { return atomic_read(atomical
 
 void simulation::set_food_count(float food_count) noexcept {
     std::atomic_ref{atomically_accessed.food_count} = food_count;
+}
+
+std::size_t simulation::get_births() const noexcept {
+    return atomic_read(atomically_accessed.births);
+}
+std::size_t simulation::get_deaths() const noexcept {
+    return atomic_read(atomically_accessed.deaths);
+}
+
+void simulation::increment_births() noexcept {
+    ++std::atomic_ref{atomically_accessed.births};
+}
+
+void simulation::increment_deaths() noexcept {
+    ++std::atomic_ref{atomically_accessed.deaths};
 }
 
 } // namespace ant_sim

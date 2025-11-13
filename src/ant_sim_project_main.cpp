@@ -195,4 +195,7 @@ int main(int argc, char* argv[]) {
 
         window.display();
     }
+
+    std::println("TotalBirths,{}", sim.lock()->get_births());
+    std::println("TotalDeaths,{}", sim.lock()->get_deaths());
 }

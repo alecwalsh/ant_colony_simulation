@@ -102,6 +102,9 @@ class simulation {
 
         bool log_ant_movements = false;
         bool log_ant_state_changes = true;
+
+        std::size_t births = 0;
+        std::size_t deaths = 0;
     } atomically_accessed;
 
     // Holds new ants that have not yet been added to the simulation
@@ -142,6 +145,12 @@ class simulation {
 
     [[nodiscard]] float get_food_count() const noexcept;
     void set_food_count(float food_count) noexcept;
+
+    [[nodiscard]] std::size_t get_births() const noexcept;
+    [[nodiscard]] std::size_t get_deaths() const noexcept;
+
+    void increment_births() noexcept;
+    void increment_deaths() noexcept;
 
     // Returns a rows x columns std::mdspan referring to tiles
     [[nodiscard]] auto get_tiles(this auto&& self) noexcept {
