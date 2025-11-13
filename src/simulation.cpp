@@ -172,9 +172,9 @@ void simulation::tick() {
         ant.tick(*this);
 
         if(ant.dead) {
-            it = ants.erase(it);
-
             std::println("Death,{},{},{},{}", ant.ant_id, ant.nest_id, ant.location.x, ant.location.y);
+
+            it = ants.erase(it);
         } else {
             ++it;
         }
