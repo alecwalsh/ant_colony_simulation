@@ -76,7 +76,7 @@ void ant::move(simulation& sim, point<> new_location) {
 
     auto nests = sim.get_nests();
 
-    if(current_tile.has_nest) {
+    if(current_tile.has_nest && current_tile.nest_id == nest_id) {
         // Nests can hold multiple ants
         auto& nest = nests[current_tile.nest_id];
 
