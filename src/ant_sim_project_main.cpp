@@ -72,6 +72,9 @@ ant_sim::simulation_args_t parse_args(std::span<const char*> args) {
     return result;
 }
 
+// Exit after this many ticks have passed
+ant_sim::tick_t max_ticks = 1200;
+
 int main(int argc, char* argv[]) {
     for(int i = 0; i < argc; i++) {
         std::print("{} ", argv[i]);
@@ -94,6 +97,11 @@ int main(int argc, char* argv[]) {
     std::jthread simulation_thread{[](const std::stop_token& stop_token, ant_sim::simulation_mutex& sim) {
         while(!sim.stopped() && !stop_token.stop_requested()) {
             auto locked_sim = sim.lock();
+
+            if(locked_sim->get_tick_count() > max_ticks) {
+                sim.stop();
+                break;
+            }
 
             locked_sim->tick();
 
@@ -125,7 +133,7 @@ int main(int argc, char* argv[]) {
 
     sf::Clock clock;
 
-    while(window.isOpen()) {
+    while(window.isOpen() && !sim.stopped()) {
         while(const auto event = window.pollEvent()) {
             // Make sure the GUI knows about any inputs
             gui.process_event(*event);
