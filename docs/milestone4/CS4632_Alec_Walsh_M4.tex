@@ -11,13 +11,616 @@
 
 \maketitle
 
+\section{Introduction}
+
+\subsection{Changes since the last milestone}
+
+There have been no changes to the simulation itself since Milestone 3, apart from several bug fixes and refactoring.  I have, however changed several of the default values for the simulation parameters.
+
+The value of ant\_count\_per\_nest was changed from 10 to 50, the value of food\_taken was changed from 50 to 500, and the value of max\_food\_supply was changed from 500 to 5000.  These changes help sustain larger populations, resulting in more useful statistics.  The default nest count was also reduced from 2 to 1.  Testing the behavior of multiple nests is done in one of the scenarios, but is not used for the majority of the data collection.
+
+\subsection{Tested parameters and expected results}
+
+\begin{enumerate}
+    \item Initial population size.  As mentioned in Milestone 3, the initial population size doesn't matter much in the long run, as the population quickly either converges to some value, or collapses to 1(not 0, as queens don't actually die of hunger in the simulation).  There should be little correlation with the mean population, although the total births and deaths will be affected.
+    \item The amount of food ants take from food sources.  This should be positively correlated with the population.
+    \item Hunger increase rate.  This should be negatively correlated with the population.
+    \item Amount of food per new ant.  This should be negatively correlated with the population.
+\end{enumerate}
+
+\subsection{Metrics collected}
+
+The metrics collected are
+
+\begin{itemize}
+    \item Total births
+    \item Total deaths
+    \item Mean population
+    \item Median population
+    \item Mean food supply
+    \item Median food supply
+\end{itemize}
+
+The "mean" in "mean population" and "mean food supply" refers to the mean value of that variable across all 6000 ticks of a single run.
+
 \section{Results}
 
-\section{Analysis}
+I use the RNG and distributions from the C++ standard library.  While the RNG itself produces the same results on different platforms, the distributions(e.g. std::uniform\_real\_distribution) are not guaranteed to produce identical results on different platforms.  The statistical properties should be the same on different platforms, however.  The results below were produced on macOS, which uses the libc++ C++ standard library.
+
+The unit of time used within the simulation is referred to as a tick.  All results below were produced by running the simulation for 6000 ticks.  By default, each tick takes 100ms, although I decreased this to make collecting the results faster.
+
+The metrics collected are collected by running the simulation with the specified parameters 40 times the seeds 1-40.  The parameter being tested is varied linearly from the listed starting value to the listed ending value.
+
+The mean column contains the mean value across all 40 different runs.
+
+Each table below contains the aggregate results collected across a batch of 40 runs.  The raw data is 40 times longer, so I didn't include it directly in this document.  I will include in the submission to D2L, though.
+
+\subsection{Initial population size}
+
+The initial population size test begins with the value 2, and increases by 50 each time, up to 202.
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Initial population: 2} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 279.975     & 262.389658127579 & 0         & 844       \\
+TotalDeaths & 269.3       & 250.828902763494 & 1         & 818       \\
+MeanPop     & 13.8        & 11.8974248452645 & 1         & 40        \\
+MedianPop   & 13.425      & 12.2031679367412 & 1         & 41        \\
+MeanFood    & 445020.9295 & 42126.5249567114 & 383586.03 & 545628.44 \\
+MedianFood  & 481525.5    & 45275.8428513201 & 414590    & 590000   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[19.6152352418684	24.1847647581316] \\
+MeanFood 95\% confidence:	[425998.616296289	450737.394203712]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Initial population: 52} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 426.075      & 165.226710993232 & 42       & 794      \\
+TotalDeaths & 460.5        & 157.427394742416 & 93       & 793      \\
+MeanPop     & 21.9         & 7.41031851628663 & 4        & 37       \\
+MedianPop   & 20.9         & 7.60836247080668 & 1        & 36       \\
+MeanFood    & 438368.00525 & 40118.4024187235 & 369126.5 & 518268.7 \\
+MedianFood  & 474657.625   & 43423.4675709047 & 400115   & 561080  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[19.6152352418684	24.1847647581316] \\
+MeanFood 95\% confidence:	[425998.616296289	450737.394203712]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Initial population: 102} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 453.975      & 178.12189538455  & 85       & 939       \\
+TotalDeaths & 534.35       & 171.020848931441 & 186      & 985       \\
+MeanPop     & 25.225       & 7.70443595166663 & 7        & 44        \\
+MedianPop   & 23.125       & 8.32416161944653 & 1        & 44        \\
+MeanFood    & 436155.45325 & 41034.5272913152 & 359963.7 & 517896.66 \\
+MedianFood  & 472617.375   & 44414.0296035498 & 388795   & 560430   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[22.84955234482	27.60044765518] \\
+MeanFood 95\% confidence:	[423503.602777483	448807.303722517]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Initial population: 152} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 436.175      & 178.820334916047 & 53        & 807       \\
+TotalDeaths & 566.175      & 171.102441574691 & 204       & 928       \\
+MeanPop     & 25.45        & 7.48314345027782 & 7         & 40        \\
+MedianPop   & 22.425       & 7.78192349829612 & 1         & 37        \\
+MeanFood    & 436742.02325 & 41712.3838975972 & 357737.38 & 519719.12 \\
+MedianFood  & 473438.25    & 45389.9932147876 & 387660    & 564015  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[22.84955234482	27.60044765518] \\
+MeanFood 95\% confidence:	[423503.602777483	448807.303722517]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Initial population: 202} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 458.95      & 186.554446579173 & 122      & 901      \\
+TotalDeaths & 639         & 179.310359790518 & 323      & 1053     \\
+MeanPop     & 27.3        & 7.55899871269082 & 11       & 46       \\
+MedianPop   & 23.55       & 7.74911078438797 & 7        & 42       \\
+MeanFood    & 435746.3055 & 42236.2475871537 & 352091.9 & 519853.4 \\
+MedianFood  & 472381.125  & 45853.1263856997 & 381970   & 564645  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[24.9693938556676	29.6306061443324] \\
+MeanFood 95\% confidence:	[422723.938136066	448768.672863934]
+
+
+\subsection{Food taken}
+
+The food taken test begins with the value 5, and increases by 500 each time, up to 2005.
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food taken: 5} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 7.475      & 33.220311596433   & 0         & 201       \\
+TotalDeaths & 56.275     & 32.6190030346478  & 49        & 247       \\
+MeanPop     & 1.225      & 0.83166499665831  & 1         & 5         \\
+MedianPop   & 1.2        & 0.757864746745073 & 1         & 5         \\
+MeanFood    & 456780.848 & 43001.8716930571  & 383714.28 & 545586.44 \\
+MedianFood  & 494000.125 & 46509.0865189817  & 415000    & 590000 \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[0.968579325131533	1.48142067486847] \\
+MeanFood 95\% confidence:	[443522.421825463	470039.274174537]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food taken: 505} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 414.275     & 168.288060045406 & 25        & 854      \\
+TotalDeaths & 447.25      & 160.567702790714 & 74        & 869      \\
+MeanPop     & 21.425      & 7.95463902708866 & 3         & 40       \\
+MedianPop   & 20.375      & 8.21720365437269 & 1         & 40       \\
+MeanFood    & 438962.0325 & 39624.9454059804 & 368058.97 & 518461.8 \\
+MedianFood  & 475636.125  & 42518.0966522808 & 399970    & 560945  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[18.9724092142186	23.8775907857814] \\
+MeanFood 95\% confidence:	[426744.787234835	451179.277765166]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food taken: 1005} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 584.475     & 225.650624832238 & 156       & 1046     \\
+TotalDeaths & 611.325     & 214.402615213193 & 205       & 1073     \\
+MeanPop     & 26.975      & 8.64540043710809 & 8         & 43       \\
+MedianPop   & 25.375      & 9.12783148903986 & 3         & 41       \\
+MeanFood    & 433693.4685 & 40056.2796016481 & 360218.53 & 516082.3 \\
+MedianFood  & 469362      & 43216.6833259137 & 389245    & 558850  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[24.309432225116	29.640567774884]
+MeanFood 95\% confidence:	[421343.233381959	446043.703618041]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food taken: 1505} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 704.95       & 249.438132712867 & 189      & 1133      \\
+TotalDeaths & 723.7        & 240.742782196034 & 238      & 1134      \\
+MeanPop     & 30.475       & 8.56045619440987 & 9        & 44        \\
+MedianPop   & 28.55        & 8.4851302817008  & 6        & 43        \\
+MeanFood    & 430010.98625 & 41225.4643657226 & 348192.2 & 508723.84 \\
+MedianFood  & 464830.875   & 44527.6400459411 & 374975   & 549255  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[27.8356224100178	33.1143775899822] \\
+MeanFood 95\% confidence:	[417300.265663105	442721.706836895]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food taken: 2005} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 789.725      & 271.322873940029 & 257       & 1327      \\
+TotalDeaths & 808.525      & 264.437476251294 & 294       & 1346      \\
+MeanPop     & 32.775       & 8.65429343573436 & 14        & 49        \\
+MedianPop   & 30.6         & 8.75536465582161 & 13        & 48        \\
+MeanFood    & 427197.86675 & 41868.6676629425 & 343991.53 & 510119.47 \\
+MedianFood  & 461539.125   & 45710.4875315128 & 371535    & 551960   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[30.1066903173545	35.4433096826456] \\
+MeanFood 95\% confidence:	[414288.832389875	440106.901110125]
+
+
+\subsection{Hunger increase rate}
+
+The hunger increase rate test begins with the value 0.1, and increases by 0.9 each time, up to 3.7.  For reference, ants die when their hunger reaches 100.
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Hunger increase rate: 0.1} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 815.9        & 241.371274818882 & 392      & 1377      \\
+TotalDeaths & 563.675      & 166.396712784962 & 297      & 877       \\
+MeanPop     & 277.05       & 73.5101423317968 & 115      & 471       \\
+MedianPop   & 300.225      & 85.0503583857144 & 118      & 524       \\
+MeanFood    & 425561.86025 & 43758.7006150246 & 331969.5 & 507738.66 \\
+MedianFood  & 461597.125   & 47545.5762034959 & 358180   & 550185   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[254.385200613065	299.714799386935] \\
+MeanFood 95\% confidence:	[412070.087014193	439053.633485807]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Hunger increase rate: 1.0} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 408.125     & 172.689463028367 & 32        & 828      \\
+TotalDeaths & 441.25      & 165.008274850781 & 81        & 853      \\
+MeanPop     & 21.3        & 8.0803655667493  & 3         & 40       \\
+MedianPop   & 20.2        & 8.43132133696608 & 1         & 40       \\
+MeanFood    & 438905.3405 & 40149.2299869158 & 362839.12 & 520916.4 \\
+MedianFood  & 475644.375  & 43369.1728840964 & 392970    & 564310  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[18.8086449470218	23.7913550529782] \\
+MeanFood 95\% confidence:	[426526.446726593	451284.234273407]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Hunger increase rate: 1.9} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 266.225      & 198.011329318455 & 9         & 797      \\
+TotalDeaths & 309.475      & 191.853842272892 & 58        & 815      \\
+MeanPop     & 7.925        & 4.96855496714472 & 1         & 20       \\
+MedianPop   & 6.875        & 5.56632503173992 & 1         & 20       \\
+MeanFood    & 444970.62375 & 40373.8943858497 & 369420.94 & 520157.3 \\
+MedianFood  & 482132.625   & 43707.8023015944 & 400075    & 563395  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[6.39308483834776	9.45691516165224] \\
+MeanFood 95\% confidence:	[432522.460983639	457418.786516361]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Hunger increase rate: 2.8} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 121.575     & 148.099392734086 & 3         & 542      \\
+TotalDeaths & 170.025     & 146.797346356928 & 52        & 591      \\
+MeanPop     & 2.975       & 2.61639309365256 & 1         & 11       \\
+MedianPop   & 2.375       & 2.82559274471293 & 1         & 11       \\
+MeanFood    & 451004.7665 & 40706.8708460508 & 381136.25 & 527470.5 \\
+MedianFood  & 489368.75   & 43591.6010310325 & 415000    & 575000  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[2.16830826054806	3.78169173945194] \\
+MeanFood 95\% confidence:	[438453.939741547	463555.593258453]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Hunger increase rate: 3.7} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 55.575     & 92.63766955463   & 0         & 531       \\
+TotalDeaths & 104.325    & 91.4533333426791 & 49        & 571       \\
+MeanPop     & 1.5        & 1.21949968724042 & 1         & 8         \\
+MedianPop   & 1.2        & 1.11401330379203 & 1         & 8         \\
+MeanFood    & 454111.445 & 42465.0178768189 & 379385.53 & 543278.44 \\
+MedianFood  & 493284.625 & 46666.5141625828 & 415000    & 590000   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[1.12400132978959	1.87599867021041] \\
+MeanFood 95\% confidence:	[441018.542706375	467204.347293625]
+
+
+\subsection{Food per new ant}
+
+This test varies the amount of food the queen requires to create a new worker ant.
+It begins with the value 10, and increases by 90 each time, up to 370.
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food per new ant: 10} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 4690.2       & 1380.60418212184 & 1036   & 6000      \\
+TotalDeaths & 4631.25      & 1354.33906200471 & 1054   & 5918      \\
+MeanPop     & 108.7        & 28.7314711753059 & 32     & 146       \\
+MedianPop   & 111.125      & 31.6537254258221 & 30     & 147       \\
+MeanFood    & 424590.33575 & 43214.2266854917 & 346224 & 513877.84 \\
+MedianFood  & 459881       & 46576.0025450545 & 376525 & 556645   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[99.8414532794594, 117.558546720541] \\
+MeanFood 95\% confidence:	[411266.435844224, 437914.235655776]
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food per new ant: 100} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 653.85      & 243.869505878525 & 89       & 1261      \\
+TotalDeaths & 678.85      & 233.650357893134 & 138      & 1253      \\
+MeanPop     & 28.7        & 9.09550466594379 & 5        & 48        \\
+MedianPop   & 27.225      & 9.60365181611288 & 1        & 48        \\
+MeanFood    & 435895.3375 & 41091.9222287279 & 352425.1 & 516984.66 \\
+MedianFood  & 472157.75   & 44301.4569991055 & 382975   & 559915   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[25.8956551567256, 31.5043448432745] \\
+MeanFood 95\% confidence: [423225.790901465, 448564.884098535]
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food per new ant: 190} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 317.875      & 142.396014691423 & 35        & 632       \\
+TotalDeaths & 352.4        & 133.11009516899  & 84        & 644       \\
+MeanPop     & 18.175       & 7.22491238523755 & 3         & 33        \\
+MedianPop   & 17.175       & 7.91586365698004 & 1         & 34        \\
+MeanFood    & 439899.96675 & 39564.3374028779 & 368131.75 & 517471.38 \\
+MedianFood  & 476877.125   & 42854.1356333483 & 399780    & 560450   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[15.9474000443302,	20.4025999556698] \\
+MeanFood 95\% confidence:	[427701.408269923,	452098.525230077]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food per new ant: 280} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 192.85     & 105.190803439298 & 14        & 444      \\
+TotalDeaths & 234.275    & 98.6090409076062 & 63        & 466      \\
+MeanPop     & 13.35      & 6.23698645180507 & 3         & 30       \\
+MedianPop   & 12.15      & 7.11282698315569 & 1         & 30       \\
+MeanFood    & 442900.944 & 40716.8238048663 & 368670.88 & 520658.8 \\
+MedianFood  & 479979.125 & 43878.107850883  & 400120    & 564025  \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[11.4269994149767,	15.2730005850233] \\
+MeanFood 95\% confidence:	[430347.048524664,	455454.839475336]
+
+
+\begin{center}
+\begin{tabular}{ | c |  c | c | c | c | }
+\hline
+\multicolumn{5}{|c|}{Food per new ant: 370} \\
+\hline
+Metric & Mean & Std Deviation & Min & Max \\
+\hline
+
+TotalBirths & 142.75       & 93.9691029418303 & 10        & 340       \\
+TotalDeaths & 184.9        & 86.6664102560309 & 59        & 361       \\
+MeanPop     & 11.125       & 5.87994200215597 & 2         & 22        \\
+MedianPop   & 9.725        & 6.6871000958792  & 1         & 22        \\
+MeanFood    & 444285.21325 & 40212.7462526339 & 369082.34 & 521259.34 \\
+MedianFood  & 481984.375   & 43106.5937485132 & 400190    & 564545   \\
+
+\hline
+\end{tabular}
+\end{center}
+
+MeanPop 95\% confidence:	[9.3120840994409	12.9379159005591] \\
+MeanFood 95\% confidence:	[431886.736009949	456683.690490051]
+
+
+\subsection{Graphs and analysis}
+
+My predictions on how the metrics would correlate with the parameters were generally right, and nothing about the results was particularly surprising.
+
+The first or last value for each parameter, depending on the parameter, is generally a bit of an outlier.  When the population gets too low, there is a chance that it will decrease until it contains a single queen, at which point it cannot recover.  Extreme values of the parameters increase the chances of that.  These show up in the graphs either as a y-intercept near zero(for the first 2 parameters tested), or as the graph quickly approaching 0 as the x value increases(for the last 2 parameters).
+
+I will the analyze the metrics in pairs.  Total births and total deaths seem to be closely linked in the scenarios I have measured, so they will be analyzed together.  The same applies to the pair of mean and median population, and the pair of mean and median food supply.
+
+\subsection{Initial population size}
+
+\includegraphics[width=0.9\textwidth]{initial_pop_births.png} \\
+
+With the exception of the first value for the parameter, the total births are relatively flat.  The deaths, however, increase with the parameter.  The difference between births and deaths is roughly equal to the initial population.  This makes sense, given the fact that the final population is mostly independent of the initial population.  For 2 different initial populations to reach the same final population, the larger population must have more deaths.  If the simulation were run for longer, this effect would likely become less noticeable.  With a runtime of 6000 ticks, however, it is readily apparent. \\
+
+Ignoring the first value, total births have a very low, almost 0, sensitivity.  As noted before, an increase of n in the initial population results in an increase of around n for the total deaths.  Total deaths therefore have a sensitivity of ~1.
+
+\includegraphics[width=0.9\textwidth]{initial_pop_pop.png} \\
+
+I was not expecting the initial population to affect the final population significantly.  However, what I measured was not the final population that the simulation stabilizes at, but the mean and median.  A large initial population has some effect on the mean even if it immediately collapses.  The median is affected as well, but to a lesser extent.  I believe that I ran the simulation for long enough to hide this trend, however.  The graph fluctuates a bit for the final 4 values of the parameter, but mainly stays flat.  The standard deviation is around 7, compared to a mean of 32, so this fluctuation is not unexpected.  The first value of the parameter is an outlier.  With an initial population of 2, there is a significant change that the single worker ant dies before finding food, resulting in a very low mean for the run.  This happened often enough to bring the average down for this value of the parameter.  \\
+
+These parameters have a very low sensitivity, ignoring the outlier.  An increase of 150 in the input results in an increase of 5.4 in the mean and 2.65 in the median, for a sensitivity of 0.036 and 0.018.
+
+\includegraphics[width=0.9\textwidth]{initial_pop_food_supply.png} \\
+
+While the population increases after the first value of the parameter before flattening out, the food supply initially decreases before flattening out.  The percent change in food supply is low, however.  Note the y-axis:  The smallest value on the graph is over 95\% of the largest value.  The graph is decreasing very slowly.  I believe this is due to the problems the ants have with located food sources farther from their nest.  I mentioned this in the previous milestones.  When ants get too far from their nest, they have a tendency to get lost.  As a result, most of the food supply is unable to be utilized in the single nest scenario. \\
+
+These metrics have a negative, but very low in magnitude, sensitivity to the parameter, even including the first value.
+
+200 / -2622 = -0.077
+200 / -9144 = -0.022
+
+\subsection{Food taken}
+
+\includegraphics[width=0.9\textwidth]{food_taken_births.png} \\
+
+Giving the "Food taken" parameter a value of 5 results in a very lopsided distribution.  The minimum value of total births is 0, due to some runs dying out before any reproduction takes place.  The max value is 201, however.  The standard deviation is very large, at more than 4 times the mean.  With such a small value for this parameter, the fate of the colony depends almost entirely on chance.  If the world generation placed food very close to the nest, then the colony may survive.  Otherwise, it will most likely quickly die out.
+
+As the parameter's value is further increased the total births and deaths increases with it, at what appears to be a sub-linear rate. \\
+
+Sensitivity for births: 0.391125
+Sensitivity for deaths: 0.376
+
+\includegraphics[width=0.9\textwidth]{food_taken_pop.png} \\
+
+The behavior with the population metrics is similar.  There is a large jump from the first parameter to the second, followed by a more gradual increase. Taking more food increases the rate at which ants can be born and decreases the rate of starvation, so this result makes sense. \\
+
+Sensitivity for mean: 0.015775
+Sensitivity for median: 0.0147
+
+\includegraphics[width=0.9\textwidth]{food_taken_food_supply.png} \\
+
+Increasing the food ants take from food sources unsurprisingly decreases the total food supply.  The effect is small however, as with the previous parameter, though not as small.  The smallest value for the food supply is around 85\% of the largest.   The median is noticeably higher than the mean.  I believe this is due to the initial food supply starting out very low, then quickly increasing.  A small number of extreme values affects the mean more than the median.
+
+Sensitivity for mean: -14.7915
+Sensitivity for median: -16.2305
+
+\subsection{Hunger increase rate}
+
+\includegraphics[width=0.9\textwidth]{hunger_increase_births.png} \\
+
+The hunger increase rate determines how quickly ants die from starvation.  As a result, larger values will result in smaller populations and population growth rates, so this graph has a negative slope.  The birth rate is higher than the death rate for a value of 0.1, indicating that a hunger increase rate that low allows the population to grow from its default initial value.  For the other 4 tested values, total deaths are higher than total births, indicating that the starting population was larger than the environment's carrying capacity.
+
+\includegraphics[width=0.9\textwidth]{hunger_increase_pop.png} \\
+
+This graph confirms my analysis of the previous graph.  The default initial population is 50, and the first value for the parameter supports a population value larger than 50, while higher values for the hunger increase rate quickly drop the parameter below 50.
+
+\includegraphics[width=0.9\textwidth]{hunger_increase_food_supply.png} \\
+
+As before, the food supply varies in the opposite direction to the population and birth rates.  The change in food supply is again small relative to the total, and the median is again noticeably higher than the mean.
+
+\subsection{Food per new ant}
+
+\includegraphics[width=0.9\textwidth]{food_per_new_ant_births.png} \\
+
+There is a large decrease after the first increase in the parameter.  The decrease after that is slow but consistent.  This makes sense, as increasing the food required for reproduction directly decreases the time between births.
+The mean and median are almost indistinguishable here.
+
+\includegraphics[width=0.9\textwidth]{food_per_new_ant_pop.png} \\
+
+As with the previous graph, there is a large decrease after the first increase in the parameter.  The decrease after that is quicker than the previous metrics, but still slow.  The mean and median are almost indistinguishable, just like before.
+
+\includegraphics[width=0.9\textwidth]{food_per_new_ant_food_supply.png} \\
+
+This parameter slows down population growth, and so it increases total food supply.  As with the previous parameters, these metrics vary in the opposite way to the other 4 metrics, and the median is higher than the mean.
 
 \section{Conclusion}
 
+As mentioned before, my original goal of seeing cyclic changes in the population of both ants and food has not been achieved.  I have tried a large variety of different combinations of parameters, and none of them have fixed it.  \\
 
+I have several ideas remaining, but they all involve changing core aspects of the model.  A core part of the model is that ants make decisions based on locally available information only(pheromones on neighboring tiles) without maintaining any state beyond a single boolean.  Most of my ideas for improving the pathfinding more than I already have involve adding additional state to each ant - for example, keeping track of the direction to the nest.  As a result, I have decided to stick with the pathfinding I have and see what results it gives me. \\
+
+The metrics I have measured do seem to have sensible responses to changes in the parameters.  Everything varied in the way I expected it to, and conclusions I have come to from looking at one metric seem to be confirmed by looking at the others.
 
 \end{document}
-
