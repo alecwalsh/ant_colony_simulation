@@ -265,12 +265,19 @@ void ant::tick(simulation& sim) {
         }
 
         if(hunger >= sim.hunger_to_die) {
+            auto& tile = sim.get_tiles()[location.y, location.x];
+
+            assert(tile.has_ant);
+
             // Mark ant as dead
             // It will be removed once this method returns
-            assert((sim.get_tiles()[location.y, location.x].has_ant));
-
             dead = true;
-            sim.get_tiles()[location.y, location.x].has_ant = false;
+
+            // Nests always have a queen, so has_ant should never be set to false for a nest tile
+            if(!tile.has_nest) {
+                // Non nest tiles can only hold a single ant, so we can set has_ant to false here
+                tile.has_ant = false;
+            }
 
             sim.increment_deaths();
 
