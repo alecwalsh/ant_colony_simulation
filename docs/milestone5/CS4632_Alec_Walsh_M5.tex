@@ -5,16 +5,153 @@
 
 \title{Ant Colony Simulation Project Milestone 5}
 \author{Alec Walsh}
-\date{December 4 2025}
+\date{December 8 2025}
 
 \begin{document}
 
 \maketitle
 
+\tableofcontents
+
+\section{Abstract}
+
+This project features a simulation modeled after real-life ant colonies.  The simulation is done at the level of individual ants.  A simple simulated world in which the ants move around is included.
+
+The main goal of this simulation is to reproduce the way ants cooperatively search the environment for food and to model population dynamics.
+
+Both goals were partially accomplished, although there were some difficulties that prevented the simulation from reproducing all of the results I had hoped for.
+
+A GUI was implemented that displays a live view of the simulated world.  Changing a variety of simulation parameters from the GUI is supported.  Pheromone levels and food sources are displayed by using color tiles of varying brightness.
+
+
 \section{Introduction}
 
-\section{Conclusion}
+Real-life ants communicate with one another using chemical signals called pheromones.  This project aims to simulate that.
 
+Ant colonies are limited in their growth by environmental factors.  This project also aims to simulate the interaction between ant population and food supply.
+
+In regards to pathfinding, my main goal was for ants to be able to locate food sources with a minimal amount of per-ant state.  In the final implementation, each ant's state consists of a single boolean, which determines whether the ant is searching for food or returning to the nest.
+
+Ants perform pathfinding by sensing pheromones left on the ground.  While searching for food, ant leave behind a pheromone trail.  While returning to the nest with, ants leave behind a trail of a different type of pheromone.  I had hoped that this would allow ants in a colony to collectively locate food sources by constantly reinforcing the pheromone trails to and from the nest.  This proved to be difficult, and the final simulation's pathfinding is not as effective as I had hoped.
+
+\section{Background and Literature Review}
+
+The idea of modeling ant colonies(and colonies of other insects with similar behaviors, such as termites) is not new.
+
+This topic has been examined for several reasons.  The ability of ants to collectively solve problems is interesting, and researchers have attempted to mimic that sort of swarm intelligence\cite{ant-colony-optimization} in computer simulations.  
+
+The idea of a pathfinding algorithm resulting from the collective behave of a large number of agents, each of which is almost stateless and can only access information available locally, is what inspired my approach.
+
+Some attempts at simulating ant colonies have given the ants more complex behaviors than in my simulation.  In the article Biologically inspired ant colony simulation\cite{antsim:1}, ants can interact with each other in addition to interacting with the environment.  Ant-ant interaction were not modeled in my simulation, with the exception that ants block each others movement.
+
+\section{Model Design and Architecture}
+
+The model consists of three main components.  Ant nests store both food and ants.  Food sources contain a certain amount of food, which can be taken by ants and replenishes over time.
+
+The third component is the ants themselves.  There are two types of ants in the final simulation.  Worker ants search for food, collect it, and bring it back to the nest.  Queen ants remain at their nest, and produce more worker ants while consuming food.
+
+I made several design choices that were intended to improve the performance with large worlds.
+\begin{itemize}
+    \item The pheremone strengths are updated lazily.  Each tile stores both the strength values and the time that they were last updated.  This means that with large grids every tile's pheromone strengths do not need to be updated every tick, only when accessed.
+    \item The GUI only reads the values of tiles that are currently visible.
+\end{itemize}
+
+These two optimizations mean that worlds with millions of tiles can run at high speeds, without lag.
+
+The basic components of the simulation and their interactions are depicted below.
+
+\includegraphics[width=0.9\textwidth]{entity_diagram.png} \\
+
+\section{Implementation}
+
+The project was implemented in C++.  It is cross-platform, and supports Windows, Linux, and macOS.
+
+The graphics were created with the SFML library.  The user interface was created using the Dear ImGUI libary.
+
+I also used a third party implementation of the mdspan type.  This type is part of the C++ standard library as of C++23, but is not yet implemented on all platforms I want to support.  At some point in the future, it will be possible to remove this dependency.
+
+The implementation is partially multithreaded.  The simulation runs in one thread, while the GUI runs in another thread.  The simulation itself is not multithreaded, however.
+
+In the main function, a thread is started to run the simulation, and the GUI is then started on the main thread.  This is because some platforms have trouble when windows are drawn to from threads other than the main thread.
+
+Most of the world state is protected with a mutex.  Some values that are frequently accessed from both the GUI thread and simulation thread, such as the current tick count, are instead protected by being accessed through std::atomic\_ref.
+
+\section{Experimental Setup}
+
+The experimental setup I used is slightly different from the code at the milestone5 Git tag.  To simplify data collection, I disabled the GUI.  As I mentioned in the architecture section, the simulation and the GUI are separate components that run in different threads.  Disabling the GUI was therefore very simple.
+
+The results should be reproducible, with the following caveats:
+
+\begin{itemize}
+    \item The random distributions in the C++ standard library are not guaranteed to give identical results on different platforms.  I collected the statistics on macOS 15.7.  Running the simulation on a different platform may give different results.  The results should be similar, just not necessarily identical.
+    \item When running with the GUI, the results are not entirely deterministic.  This is due to the way the pheromone strengths are lazily updated and the use of floating point numbers.  Each tile stores the pheromone strengths and the time it was last updated.  When the pheromone strengths are read, the current strength is decreased according to the time since the last update and the pheromone decrease rate.  However, with floating point numbers, the distributive property does not hold, so the exact timing of the lazy updates changes the results slightly.  The timing of the GUI thread is nondeterministic, and so the entire simulation is nondeterministic.  The statistics I collected for Milestone 4 were collected with the GUI thread disabled, so they are not affected by this source of nondeterminism.
+    
+\end{itemize}
+
+The statistics were collected by running the executable with the proper command line arguments, then importing the results into a spreadsheet.
+
+
+\section{Results and Analysis}
+
+The main conclusion I took from these results is that my model seems to have a natural carrying capacity that is determined by the simulation parameters(with the exception of the initial population).  Changing the initial population have little to no effect on final population.  Other parameters do effect the carrying capacity, however, and they do so in the expected ways.
+
+If the initial population is very small, there is a chance that all worker ants will die out before they can collect any food.  When averaging the behavior over many runs, as I did when collecting statistics, this effect becomes irrelevant.
+
+The function that most closely approximates the behavior of my model is the logistic function. \cite{logistic-function}
+
+The logistic function is $ f(x) = \frac{L}{1 + e^{-k \cdot (x - x_{0})}} $
+where $ L $ is the carrying capacity and $ k $ and $ x_{0} $ are parameters that allow tuning the precise shape of the graph.
+
+This function increases quickly at first, then rapidly decreases its growth rate as it approaches the carrying capacity.  My model is more probabilistic than that, with the final population fluctuating around the carrying capacity, but the overall behavior is very similar.
+
+The logistic function is used to model population growth in real life, so my model was at least partly successful in reproducing some aspects of real life population dynamics.
+
+I had hoped that my model would be able to reproduce more advanced features of population dynamics, but that did not end up happening due to my difficulties in getting the pathfinding to behave optimally.
+
+\section{Validation and Verification}
+
+To validate the behavior of my model, I made sure that each parameter affected the metrics I was measuring in the expected way.
+
+
+\includegraphics[width=0.9\textwidth]{initial_pop_pop.png} \\
+
+Initial population did not have a significant effect on the final population, except for very low initial populations.  This was as expected.  For very low initial populations, colony extinction was likely.  For other initial populations, the final population was equal to the carrying capacity.
+
+\includegraphics[width=0.9\textwidth]{food_taken_pop.png} \\
+
+Increasing the amount of ants can take increased the population, as expected.
+
+\includegraphics[width=0.9\textwidth]{hunger_increase_pop.png} \\
+
+Increasing the rate of hunger increase decreased the final population, as expected.
+
+\includegraphics[width=0.9\textwidth]{food_per_new_ant_pop.png} \\
+
+Increasing the food required to produce a new ant decreased the final population, as expected.
+
+
+I also verified that each ant was behaving properly.  The GUI I implemented shows the strength of pheromones on each tiles.  By zooming in on single ants and single-stepping the simulation, I made sure that the ants were heading towards the correct tiles.  There is some randomness involves, so ants will occasionally choose a bad tile to move to, but they usually chose a sensible direction to move.
+
+\section{Discussion}
+
+This model demonstrates how certain aspects of population dynamics can arise from the interactions of a large number of agents, each following relatively simple rules.  Each individual ant's behavior is essentially based on going in direction of the maximum pheromone strength, with a bit of randomization.  Despite this, complicated behaviors can emerge.
+
+\section{Conclusion and Future Work}
+
+The main direction I would like to take this project in the future is rewriting the pathfinding.  As mentioned, I had a lot of trouble getting the pathfinding to work as intended while keeping per-ant state to a minimum.  By allowing each ant to have more state, I believe I could get the pathfinding to work as expected fairly easily.  The most obvious way to do this would be to store the location of any discovered food sources, then use a traditional pathfinding algorithm to return to the food source.  Another possible method would be to have each ant keep track of the direction to the nest.  This would help prevent the ants from getting lost, while still achieving most of the goal of pheromone-based pathfinding.
+
+The main reason I didn't implement these was because I was committed to the idea of the pathfinding arising naturally from the interactions of many individual ants.  Adding extra state to the ants would take away from that goal, and implementing a traditional pathfinding algorithm would essentially be abandoning it entirely.
+
+I still believe that it is possible to get my original idea working.  With certain lucky seeds, the desired behavior - ants locating a food source, then repeatedly traveling to and from that food source until a solid pheromone trail leading to the food from the nest is established - occurs.  With most seeds however, the abundance of pheromones on the tiles near the nest confuses the ants, leading to the suboptimal pathfinding I have previously described.  I think that I have simply not found the right values for the parameters. 
+
+\section{Repository link}
+
+\url{https://github.com/alecwalsh/ant_colony_simulation}
+
+\section{Bibliography}
+
+\bibliography{sources}
+\bibliographystyle{ieeetr}
 
 \end{document}
 

@@ -273,7 +273,7 @@ void ant::tick(simulation& sim) {
             // It will be removed once this method returns
             dead = true;
 
-            // Nests always have a queen, so has_ant should never be set to false for a nest tile
+            // Nests always have a queen, so has_ant  should never be set to false for a nest tile
             if(!tile.has_nest) {
                 // Non nest tiles can only hold a single ant, so we can set has_ant to false here
                 tile.has_ant = false;
