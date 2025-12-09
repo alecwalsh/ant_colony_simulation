@@ -1,37 +1,5 @@
 # Ant colony simulation project
 
-## Project Status
-
-### What has been implemented
-I have implemented most of the basic elements of the simulation.
-
-- Simulated ants move around the world, searching for food.
-- The ants leave behind pheromone trails as they move.
-- Pheromones fade over time.
-- Ants ignore pheromones from nests other than their own.
-- The graphics show the different elements of the simulation with different colors, allowing the user to visualize what is happening.
-
-### What needs improvement
-
-While the pheromone based pathfinding has been implemented, it has several issues.
-
-- Sometimes ants can get lost.  If they venture far from their nest, then the pheromone trail can fade, leaving them aimlessly wandering.  This can be improved by decreasing the rate at which pheromones fade.
-- If pheromones fade too slowly, then large areas of the map become saturated with pheromones, which reduces their effectiveness as a pathfinding tool.
-- When too many ants are present, they often get stuck following each other in circles.
-
-I believe that the first two issues can be fixed by finding the right balance of pheromone strength increases and decreases.
-
-The third one can likely be fixed by increasing the level of randomness in the ants' movements.
-
-### What hasn't been implemented yet
-
-Not everything I planned has been implemented yet.  Here are a list of features that still need to be implemented, in the order I plan to implement them.
-
-- Starvation and reproduction.  As a result, population dynamics are not yet simulated.  I anticipate adding this to be relatively simple, now that I have the basics implemented.
-- Seasonal variation in food supply.
-- Data collection and visualization.  There is currently no easy way to collect data from the simulation.  This is going to be my priority over the next few weeks.
-- Improved graphics.  I plan to allow the viewing larger sections of the world, as well as zooming and panning.  Currently, the only way to view more of the map is to resize the window.
-
 ## Installation Instructions
 
 The project is written in C++.  It uses CMake as its build system, and vcpkg for managing dependencies.
